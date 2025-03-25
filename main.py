@@ -6,6 +6,8 @@ import boto3
 import json
 from typing import Optional, List, Dict, Any
 
+from prompts.prompt_utils import generate_health_anxiety_prompt
+
 load_dotenv()
 
 app = FastAPI(title="Health Anxiety Management system", description="A LLM service to provide support for people with health anxiety", version="0.1")
@@ -35,22 +37,7 @@ def root():
 @app.post("/analyze-symptoms", response_model=HealthResponse)
 async def analyze_symptoms(query: HealthQuery):
    try:
-       prompt = f"""
-        You are a helpful health assistant designed to provide calm, factual information about common symptoms.
-        
-        User symptoms: {query.symptoms}
-        
-        User context: {query.user_context or "No additional context provided."}
-        
-        Please provide a calm and reassuring response that:
-        1. Acknowledges the user's concern
-        2. Provides factual information about these symptoms
-        3. Offers perspective on common vs. serious causes
-        4. Suggests when medical attention might be appropriate
-        5. Provides some self-care tips if applicable
-        
-        Always maintain a balanced, educational tone without dismissing concerns or causing additional anxiety.
-        """
+       prompt = generate_health_anxiety_prompt(query.symptoms, query.user_context)
        payload = {
            "prompt": prompt,
            "max_gen_len": 512,
