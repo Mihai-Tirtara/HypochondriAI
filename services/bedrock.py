@@ -40,9 +40,6 @@ class BedrockService:
         Returns:
             Dict containing the formatted request body
         """
-        print("THe model should come after this line")
-        print(settings.MODEL_ID)
-        print(self.modelId)
         if "anthropic.claude" in self.modelId:
             # Claude format
             claude_payload = {
@@ -59,14 +56,12 @@ class BedrockService:
             return claude_payload
         elif "meta" in self.modelId:
             # Meta format
-            print("meta")
             meta_payload = {
                 "prompt": prompt,
                 "max_gen_len": settings.MAX_TOKENS,
                 "temperature": settings.TEMPERATURE,
                 "top_p": settings.TOP_P
             }
-            print(meta_payload)
             return meta_payload
         else:
             logging.error(f"Model ID {self.modelId} not recognized")
