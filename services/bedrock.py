@@ -1,3 +1,4 @@
+from typing import Optional
 import boto3
 import json
 import logging
@@ -17,26 +18,111 @@ def initialize_bedrock_client():
         logging.error(f"Error initializing Bedrock client: {str(e)}")
         raise
 
-def get_bedrock_response(prompt: str):
-    """Get a response from the Amazon Bedrock model"""
-    client = initialize_bedrock_client()
-    try:
-        payload = {
-            "prompt": prompt,
-            "max_gen_len": settings.MAX_TOKENS,
-            "temperature": settings.TEMPERATURE,
-            "top_p": settings.TOP_P
-        }
-        body = json.dumps(payload)
-        response = client.invoke_model(
-            modelId=settings.MODEL_ID,
-            body=body,
-            accept="application/json",
-            contentType="application/json"
-        )
-        response_body = json.loads(response['body'].read())
-        generated_text = response_body["generation"]
-        return generated_text
-    except Exception as e:
-        logging.error(f"Error getting response from Bedrock model: {str(e)}")
-        raise
+class BedrockService:
+    def __init__(self, modelId : Optional[str] = None): 
+        """
+        Initialize Bedrock service with optional model_id
+        
+        Args:
+            model_id: The model ID to use. If None, uses the default from settings.
+        """
+        
+        self.client = initialize_bedrock_client()
+        self.modelId = modelId or settings.MODEL_ID
+
+    def prepare_request_body(self, prompt: str):
+        """
+        Prepare the request body based on the model ID
+        
+        Args:
+            prompt: The text prompt
+        
+        Returns:
+            Dict containing the formatted request body
+        """
+        print("THe model should come after this line")
+        print(settings.MODEL_ID)
+        print(self.modelId)
+        if "anthropic.claude" in self.modelId:
+            # Claude format
+            claude_payload = {
+                "anthropic_version": "bedrock-2023-05-31",
+                "max_tokens": settings.MAX_TOKENS,
+                "temperature": settings.TEMPERATURE,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            }
+            return claude_payload
+        elif "meta" in self.modelId:
+            # Meta format
+            print("meta")
+            meta_payload = {
+                "prompt": prompt,
+                "max_gen_len": settings.MAX_TOKENS,
+                "temperature": settings.TEMPERATURE,
+                "top_p": settings.TOP_P
+            }
+            print(meta_payload)
+            return meta_payload
+        else:
+            logging.error(f"Model ID {self.modelId} not recognized")
+            raise ValueError(f"Model ID {self.modelId} not recognized")
+
+    def prepare_response(self, response):
+        """
+        Prepare the response based on the model ID
+        
+        Args:
+            response: The response from the model
+        
+        Returns:
+            The generated text
+        """
+        try:
+            
+
+            if "anthropic.claude" in self.modelId:
+            # Claude format
+                return response.get('content', [{}])[0].get('text', '')
+            elif "meta" in self.modelId:
+            # Meta format
+                return response["generation"]
+            else:
+            # Try some common response formats as fallback
+                for key in ['completion', 'text', 'generated_text', 'output']:
+                    if key in response:
+                        return response[key]
+        except Exception as e:
+            logging.error(f"Error parsing response from Bedrock model: {str(response)}")
+            raise        
+        
+    def get_response(self, prompt: str):
+        """
+        Get a formated response from the Amazon Bedrock model
+        
+        Args:
+            prompt: The text prompt
+        
+        Returns:
+            The formated generated text
+        
+        """
+        try:
+            payload = self.prepare_request_body(prompt)
+            body = json.dumps(payload)
+            response = self.client.invoke_model(
+                modelId=self.modelId,
+                body=body,
+                accept="application/json",
+                contentType="application/json"
+            )
+            response_body = json.loads(response['body'].read())
+            generated_text = self.prepare_response(response_body)
+            return generated_text
+        except Exception as e:
+            logging.error(f"Error getting response from Bedrock model: {str(e)}")
+            raise    
