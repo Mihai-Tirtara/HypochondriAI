@@ -1,12 +1,14 @@
-package service
-import model.HealthQuery
-import model.HealthResponse
+package com.springboot_backend.backend_service.service
+import com.springboot_backend.backend_service.model.HealthQuery
+import com.springboot_backend.backend_service.model.HealthResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.client.RestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.stereotype.Service
 
+@Service
 class LlmService {
     @Value("\${llm.service.url}")
     private lateinit var llmServiceUrl: String
