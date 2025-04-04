@@ -11,9 +11,7 @@ class Settings(BaseSettings):
     API_PREFIX: str = "/api/v1"
     API_HOST:str = "0.0.0.0"
     API_PORT: int = 8000
-    
-
-    
+           
     # AWS settings
     AWS_ACCESS_KEY_ID: Optional[str] = None
     AWS_SECRET_ACCESS_KEY: Optional[str] = None
@@ -24,6 +22,13 @@ class Settings(BaseSettings):
     MAX_TOKENS: int = 1000
     TEMPERATURE: float = 0.3
     TOP_P: float = 0.4
+    
+    # Database settings
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 5432
+    DB_USERNAME:  Optional[str] = None
+    DB_PASSWORD:  Optional[str] = None
+    DB_NAME: str = "health_anxiety"
     
     # Logging
     LOG_LEVEL: str = "INFO"
