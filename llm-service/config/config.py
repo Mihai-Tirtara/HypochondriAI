@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     TEMPERATURE: float = 0.3
     TOP_P: float = 0.4
     
+    # Database settings
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 5432
+    DB_USER: str = "postgres"
+    DB_PASSWORD: str = "postgres"
+    DB_NAME: str = "health_anxiety"
+    
     # Logging
     LOG_LEVEL: str = "INFO"
     
