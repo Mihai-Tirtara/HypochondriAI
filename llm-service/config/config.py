@@ -11,9 +11,7 @@ class Settings(BaseSettings):
     API_PREFIX: str = "/api/v1"
     API_HOST:str = "0.0.0.0"
     API_PORT: int = 8000
-    
-
-    
+           
     # AWS settings
     AWS_ACCESS_KEY_ID: Optional[str] = None
     AWS_SECRET_ACCESS_KEY: Optional[str] = None
@@ -28,8 +26,8 @@ class Settings(BaseSettings):
     # Database settings
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
-    DB_USER: str = "postgres"
-    DB_PASSWORD: str = "postgres"
+    DB_USERNAME:  Optional[str] = None
+    DB_PASSWORD:  Optional[str] = None
     DB_NAME: str = "health_anxiety"
     
     # Logging
