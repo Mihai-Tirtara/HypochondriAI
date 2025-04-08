@@ -3,7 +3,7 @@ fastapi[standard]==0.113.0
 pydantic==2.8.0
 uvicorn==0.34.0
 pydantic-settings==2.8.1  
-  
+sqlmodel==0.0.24  
 #Aws and bedrock dependencies
 boto3==1.37.19
 
