@@ -1,5 +1,9 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
+from pydantic_core import MultiHostUrl
+from typing_extensions import Self
+from pydantic import PostgresDsn, computed_field
+
 
 class Settings(BaseSettings):
     # App settings
@@ -29,6 +33,20 @@ class Settings(BaseSettings):
     DB_USERNAME:  Optional[str] = None
     DB_PASSWORD:  Optional[str] = None
     DB_NAME: str = "health_anxiety"
+    
+    DB_URL: MultiHostUrl = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+        return MultiHostUrl.build(
+            scheme="postgresql",
+            username=self.DB_USERNAME,
+            password=self.DB_PASSWORD,
+            host=self.DB_HOST,
+            port=self.DB_PORT,
+            path=self.DB_NAME,
+        )
     
     # Logging
     LOG_LEVEL: str = "INFO"
