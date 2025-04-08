@@ -1,6 +1,11 @@
 import uuid
+from typing import List, Optional, Dict, Any # Use standard typing
+from datetime import datetime
+from sqlalchemy import func # Import func for SQLAlchemy functions
+from sqlalchemy.dialects.postgresql import JSONB # Keep this for JSONB type
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Column
+from pydantic import BaseModel
 
 class UserBase(SQLModel):
     username: str = Field(index=True, unique=True)
@@ -40,8 +45,8 @@ class Message(MessageBase, table=True):
     __tablename__ = 'messages'
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    conversation_id: int = Field(foreign_key="conversations.id")
-    message_data: Optional[dict] = Field(default=None) # For storing the complete message data in JSON format
+    conversation_id: int = Field(foreign_key="conversations.id",index=True)
+    message_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB, nullable=True))
 
     conversation: "Conversation" = Relationship(back_populates="messages")    
     

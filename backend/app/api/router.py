@@ -1,3 +1,4 @@
+"""
 from fastapi import APIRouter, HTTPException, Depends
 from api.models import HealthQuery, HealthResponse, ErrorResponse
 from services.bedrock import BedrockService
@@ -21,3 +22,5 @@ async def analyze_symptoms(query: HealthQuery):
     except Exception as e:
         logger.error(f"Error processing request: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+"""
+        
