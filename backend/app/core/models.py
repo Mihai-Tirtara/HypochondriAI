@@ -15,12 +15,12 @@ class UserCreate(UserBase):
     password: str # Receive plain password for creation
 
 class UserPublic(UserBase):
-    id: int
+    id: uuid.UUID
 
 class User(UserBase, table=True):
     __tablename__ = 'users' # Optional, SQLModel infers if class name matches
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     password_hash: str = Field(max_length=128) # Specify max_length if desired
     created_at: datetime = Field(
         default_factory=datetime.utcnow, # Use default_factory for non-SQL defaults
@@ -38,36 +38,37 @@ class MessageCreate(MessageBase):
     pass
 
 class MessagePublic(MessageBase):
-    id: int
-    created_at: datetime = Field(default_factory=datetime.utcnow)    
+    id: uuid.UUID
+    created_at: datetime  
     
 class Message(MessageBase, table=True):
     __tablename__ = 'messages'
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    conversation_id: int = Field(foreign_key="conversations.id",index=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    conversation_id: uuid.UUID = Field(foreign_key="conversations.id",index=True)
     message_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB, nullable=True))
+    created_at: datetime = Field(default_factory=datetime.utcnow) 
 
     conversation: "Conversation" = Relationship(back_populates="messages")    
     
     
 class ConversationBase(SQLModel):
-    title: Optional[str] = None    
+    title: Optional[str] = Field(default=None, max_length=100)    
 
 class ConversationCreate(ConversationBase):
-    userId: int # Include userId for creation    
+    pass    
         
 class ConversationPublic(ConversationBase):
-    id: int
-    created_at: datetime = Field(default_factory=datetime.utcnow) 
-    userId: int   
+    id:uuid.UUID 
+    created_at: datetime 
+    userId: uuid.UUID   
     messages: List[MessagePublic] = [] # Include messages in the public representation
         
 class Conversation(ConversationBase, table=True):
     __tablename__ = 'conversations'
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="users.id")
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="users.id",index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow) 
 
     user: User = Relationship(back_populates="conversations")
