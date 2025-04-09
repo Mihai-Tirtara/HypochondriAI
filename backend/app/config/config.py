@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     API_PREFIX: str = "/api/v1"
     API_HOST:str = "0.0.0.0"
     API_PORT: int = 8000
-           
+    
     # AWS settings
     AWS_ACCESS_KEY_ID: Optional[str] = None
     AWS_SECRET_ACCESS_KEY: Optional[str] = None
@@ -33,9 +33,10 @@ class Settings(BaseSettings):
     DB_USERNAME:  Optional[str] = None
     DB_PASSWORD:  Optional[str] = None
     DB_NAME: str = "health_anxiety"
-    
-    DB_URL: MultiHostUrl = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    
+    DB_SUPERUSER_USERNAME: Optional[str] = None
+    DB_SUPERUSER_PASSWORD: Optional[str] = None
+    DB_SUPERUSER_EMAIL: Optional[str] = None
+        
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
