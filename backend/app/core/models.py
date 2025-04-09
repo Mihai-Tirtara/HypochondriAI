@@ -47,7 +47,10 @@ class Message(MessageBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     conversation_id: uuid.UUID = Field(foreign_key="conversations.id",index=True)
     message_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSONB, nullable=True))
-    created_at: datetime = Field(default_factory=datetime.utcnow) 
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow, # Use default_factory for non-SQL defaults
+        sa_column_kwargs={"server_default": func.now()} # Keep server_default via sa_column_kwargs
+    ) 
 
     conversation: "Conversation" = Relationship(back_populates="messages")    
     
@@ -69,8 +72,10 @@ class Conversation(ConversationBase, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id",index=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow) 
-
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow, # Use default_factory for non-SQL defaults
+        sa_column_kwargs={"server_default": func.now()} # Keep server_default via sa_column_kwargs
+    )
     user: User = Relationship(back_populates="conversations")
     messages: List[Message] = Relationship(back_populates="conversation", sa_relationship_kwargs={"cascade": "all, delete-orphan"}) # Cascade delete for messages
     
