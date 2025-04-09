@@ -53,6 +53,9 @@ class Message(MessageBase, table=True):
     
 class ConversationBase(SQLModel):
     title: Optional[str] = None    
+
+class ConversationCreate(ConversationBase):
+    userId: int # Include userId for creation    
         
 class ConversationPublic(ConversationBase):
     id: int
