@@ -11,7 +11,10 @@ boto3==1.37.19
 # Utilities
 python-dotenv==1.0.1
 uuid==1.30
+
+# Security
 passlib==1.7.4
+bcrypt==3.2.1
 
 # LangChain dependencies
 langchain==0.3.22

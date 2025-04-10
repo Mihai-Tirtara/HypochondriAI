@@ -2,7 +2,7 @@ from typing import Generator
 from sqlmodel import Session, create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.config.config import settings # Assuming your config is here
+from config.config import settings # Assuming your config is here
 
 # Use the database URL from your settings
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI), pool_pre_ping=True)
