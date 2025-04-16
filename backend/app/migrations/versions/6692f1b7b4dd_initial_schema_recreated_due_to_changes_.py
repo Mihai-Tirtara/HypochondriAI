@@ -1,8 +1,8 @@
-"""Initial database schema with IDs as UUID
+"""Initial schema recreated due to changes in the model
 
-Revision ID: 142b1425dab8
+Revision ID: 6692f1b7b4dd
 Revises: 
-Create Date: 2025-04-09 12:59:32.064948
+Create Date: 2025-04-16 12:58:16.225879
 
 """
 from typing import Sequence, Union
@@ -12,9 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 import sqlmodel.sql.sqltypes
 
-
 # revision identifiers, used by Alembic.
-revision: str = '142b1425dab8'
+revision: str = '6692f1b7b4dd'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -43,7 +42,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_conversations_user_id'), 'conversations', ['user_id'], unique=False)
     op.create_table('messages',
-    sa.Column('content', sqlmodel.sql.sqltypes.AutoString(length=2000), nullable=False),
+    sa.Column('content', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('role', sqlmodel.sql.sqltypes.AutoString(length=50), nullable=False),
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('conversation_id', sa.Uuid(), nullable=False),

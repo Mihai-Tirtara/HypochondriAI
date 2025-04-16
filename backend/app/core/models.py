@@ -31,11 +31,11 @@ class User(UserBase, table=True):
     
 
 class MessageBase(SQLModel):
-    content: str = Field(max_length=2000) # Adjust max_length as needed
+    content: str = Field() 
     role: str = Field(max_length=50) # e.g., 'user', 'assistant'
     
 class MessageCreate(MessageBase):
-    pass
+    message_data: Optional[Dict[str, Any]] = None 
 
 class MessagePublic(MessageBase):
     id: uuid.UUID
@@ -64,7 +64,7 @@ class ConversationCreate(ConversationBase):
 class ConversationPublic(ConversationBase):
     id:uuid.UUID 
     created_at: datetime 
-    userId: uuid.UUID   
+    user_id: uuid.UUID   
     messages: List[MessagePublic] = [] # Include messages in the public representation
         
 class Conversation(ConversationBase, table=True):
@@ -79,17 +79,3 @@ class Conversation(ConversationBase, table=True):
     user: User = Relationship(back_populates="conversations")
     messages: List[Message] = Relationship(back_populates="conversation", sa_relationship_kwargs={"cascade": "all, delete-orphan"}) # Cascade delete for messages
     
-
-class HealthQuery(BaseModel):
-    symptoms: str = Field(..., description="Description of symptoms")
-    user_context: Optional[str] = Field(None, description="Additional context about health situation")        
-    
-    class Config:
-        schema_extra = {
-            "example": {
-                "symptoms": "I've been experiencing headaches and dizziness",
-                "user_context": "I have a history of migraines"
-            }
-        }
-        
-        

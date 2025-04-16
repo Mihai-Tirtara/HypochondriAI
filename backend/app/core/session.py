@@ -8,7 +8,7 @@ from config.config import settings # Assuming your config is here
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI), pool_pre_ping=True)
 
 # Create a configured "Session" class
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+#SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Dependency function to get a DB session
 def get_session() -> Generator[Session, None, None]:
@@ -16,8 +16,8 @@ def get_session() -> Generator[Session, None, None]:
     Dependency function that yields a SQLModel session.
     Ensures the session is closed afterwards.
     """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    with Session(engine) as session:
+        try:
+            yield session
+        finally:
+            pass

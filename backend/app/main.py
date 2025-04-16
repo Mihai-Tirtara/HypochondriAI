@@ -1,8 +1,11 @@
-from fastapi import FastAPI
-#from api.router import router
+from fastapi import FastAPI, HTTPException
+from api.router import router
 from config.config import settings
 from core.db import init_db
 import logging
+from services.llm import LangchainService
+import boto3
+
 
 logging.basicConfig(
     level=settings.LOG_LEVEL.upper(), # Use level from your config
@@ -17,16 +20,36 @@ app = FastAPI(
     version=settings.APP_VERSION
 )
 
-# Include the router
-#app.include_router(router)
+
 
 @app.on_event("startup")
-def on_startup():
+async def on_startup():
     logger.info("Running DB initialization...")
     try:
         init_db()
+        logger.info("DB initialization complete.")
     except Exception as e:
-        logger.error(f"Error during DB initialization: {e}")
+        logger.error(f"Error during database initilizations  {e}")
+        
+    logger.info("Initializing Langchain graph...")    
+    try:
+        await LangchainService.initialize_graph()
+        logger.info("Langchain graph initialized successfully.")
+    except Exception as e:
+        logger.error(f"Error during Langchain graph initialization: {e}")
+        # Set the class-level flag to indicate failure
+        LangchainService._initialized = False
+
+# Add or ensure the shutdown handler exists
+@app.on_event("shutdown")
+async def on_shutdown():
+    logger.info("Running application shutdown procedures...")
+    # Close the LangchainService resources (specifically the pool)
+    await LangchainService.close_pool()
+    logger.info("Application shutdown complete.")        
+
+# Include the router
+app.include_router(router)  
 
 if __name__ == "__main__":
     import uvicorn

@@ -16,13 +16,20 @@ class Settings(BaseSettings):
     API_HOST:str = "0.0.0.0"
     API_PORT: int = 8000
     
+    # Langsmith settings 
+    #LANGSMITH_TRACING = "true"
+    #LANGSMITH_ENDPOINT = "https://api.smith.langchain.com"
+    #LANGSMITH_API_KEY = "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"
+    #LANGSMITH_PROJECT ="HyphochondriAI"
+    
     # AWS settings
     AWS_ACCESS_KEY_ID: Optional[str] = None
     AWS_SECRET_ACCESS_KEY: Optional[str] = None
     AWS_REGION: str = "eu-central-1"
     
     # Bedrock settings
-    MODEL_ID: str = "eu.meta.llama3-2-1b-instruct-v1:0"
+    MODEL_ID: str = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+    MODEL_PROVIDER: str = "bedrock_converse"
     MAX_TOKENS: int = 1000
     TEMPERATURE: float = 0.3
     TOP_P: float = 0.4
@@ -48,6 +55,14 @@ class Settings(BaseSettings):
             port=self.DB_PORT,
             path=self.DB_NAME,
         )
+        params = {
+        "pool_size": "20",
+        "pool_pre_ping": "true",
+        "connect_timeout": "10"
+        }
+        # Join parameters into a query string
+        query_string = "&".join(f"{k}={v}" for k, v in params.items())
+        return f"{base_url}?{query_string}"
     
     # Logging
     LOG_LEVEL: str = "INFO"
