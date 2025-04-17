@@ -31,12 +31,12 @@ async def on_startup():
     except Exception as e:
         logger.error(f"Error during database initilizations  {e}")
         
-    logger.info("Initializing Langchain graph...")    
+    logger.info("Initializing Langchain componenents...")    
     try:
-        await LangchainService.initialize_graph()
-        logger.info("Langchain graph initialized successfully.")
+        await LangchainService.initialize_langchain_components()
+        logger.info("Langchain components initialized successfully.")
     except Exception as e:
-        logger.error(f"Error during Langchain graph initialization: {e}")
+        logger.error(f"Error during Langchain initialization: {e}")
         # Set the class-level flag to indicate failure
         LangchainService._initialized = False
 

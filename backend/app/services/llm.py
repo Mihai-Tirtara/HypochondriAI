@@ -15,16 +15,6 @@ from config.config import settings
 logger = logging.getLogger(__name__)
 
 
-
-def get_langchain_service(model_id: Optional[str] = None, model_provider: Optional[str] = None):
-    """
-    Get the Langchain service instance.
-    
-    Returns:
-        An instance of LangchainService.
-    """
-    return LangchainService(model_id=model_id, model_provider=model_provider)
-
 class State(TypedDict):
     """State for Langchain service"""
     messages: Annotated[Sequence[BaseMessage], add_messages]
@@ -92,9 +82,9 @@ class LangchainService:
         return {"messages": [response]}
     
     @classmethod
-    async def initialize_graph(cls, model_id: Optional[str] = None, model_provider: Optional[str] = None):
+    async def initialize_langchain_components(cls, model_id: Optional[str] = None, model_provider: Optional[str] = None):
         """
-        Set up the model, graph, and checkpointer for Langchain service.
+        Set up all the necessary componnents  for the Langchain service.
         
         Args:
             model_id: The model ID to use. If None, uses the default from settings.
@@ -103,50 +93,76 @@ class LangchainService:
         if cls._initialized:
             logger.info("Graph already initialized.")
             return cls.graph
+        try:
+            cls._initialize_model(model_id=model_id, model_provider=model_provider)
+            await cls._initialize_pool()
+            await cls._initialize_checkpointer()
+            cls._initialize_graph()
+        except Exception as e:
+            logger.error(f"Error initializing Langchain components: {str(e)}")
+            raise
         
-        logger.info("Initializing Langchain model, graph, checkpointer...")
+    @classmethod
+    def _initialize_model(cls, model_id: Optional[str] = None, model_provider: Optional[str] = None):
+        """
+        Initialize the model with the given ID and provider.
+
+        Args:
+            model_id: The ID of the model to use.
+            model_provider: The provider of the model.
+
+        Returns:
+            The initialized model.
+        """
         # Initialize the model
         cls._model_id = model_id or settings.MODEL_ID
         cls._model_provider = model_provider or settings.MODEL_PROVIDER 
         try:
+            # Initialize the Bedrock client one extra time for safety
+            # This is a bit redundant but ensures the client is set up before model initialization
             cls.initialize_bedrock_client()
             cls.model = init_chat_model(model=cls._model_id, model_provider=cls._model_provider)
             logger.info(f"Model initialized: {cls._model_id} with provider: {cls._model_provider}")
         except Exception as e:
             logger.error(f"Error initializing model: {str(e)}")
             raise
-        
-        #Create the database pool
-        logger.info("Creating database pool...")
-        connection_kwargs = {
-            "autocommit": True,
-            "prepare_threshold": 0,}
-        try:
-            cls.db_pool = AsyncConnectionPool(conninfo=str(settings.SQLALCHEMY_DATABASE_URI) , max_size=20, max_idle=60, kwargs=connection_kwargs)
-            logger.info("Database pool created.")
-            cls.checkpointer = AsyncPostgresSaver(cls.db_pool)
-            logger.info(f"Checkpointer type: {type(cls.checkpointer)}")
-            await cls.checkpointer.setup()
-            logger.info("Checkpointer initialized and setup complete.")
-        except Exception as e:
-            logger.error(f"Error initializing connection pool or checkpointer: {str(e)}", exc_info=True)
-            logger.info("Falling back to MemorySaver.")
-            cls.checkpointer = MemorySaver()
-            # If pool creation failed, set it to None
-            if cls.db_pool:
-                await cls.db_pool.close() # Close pool if created but setup failed
+            
+    @classmethod
+    async def _initialize_pool(cls):
+        """
+        Initialize the database pool 
+        """
+        if cls.db_pool is None:
+            logger.info("Initializing database pool...")
+            try:
+                connection_kwargs = {
+                    "autocommit": True,
+                    "prepare_threshold": 0,
+                }
+                cls.db_pool = AsyncConnectionPool(conninfo=str(settings.SQLALCHEMY_DATABASE_URI), max_size=20, max_idle=60, open=False, kwargs=connection_kwargs)
+                await cls.db_pool.open()
+                logger.info("Database pool initialized.")
+            except Exception as e:
+                logger.error(f"Error initializing database pool: {str(e)}")
                 cls.db_pool = None
-
-        #Initialize the graph
-        logger.info("Initializing graph...")
-        workflow = StateGraph(state_schema=State)
-        workflow.add_edge(START, "model")
-        workflow.add_node("model", cls.call_model)
-        workflow.add_edge("model",END)
-        cls.graph = workflow.compile(checkpointer=cls.checkpointer)
-        cls._initialized = True
-        logger.info("Graph compiled.")
-        
+                raise   
+            
+    @classmethod 
+    async def _initialize_checkpointer(cls):
+        """
+        Initialize the checkpointer for the graph.
+        """
+        if cls.checkpointer is None and cls.db_pool is not None:
+            logger.info("Initializing checkpointer...")
+            try:
+                cls.checkpointer = AsyncPostgresSaver(cls.db_pool)
+                await cls.checkpointer.setup()
+                logger.info("Checkpointer initialized.")
+            except Exception as e:
+                logger.error(f"Error initializing checkpointer: {str(e)}")
+                cls.checkpointer = None
+                raise
+            
     @classmethod    
     async def close_pool(cls):
         """
@@ -161,6 +177,23 @@ class LangchainService:
                 logger.error(f"Error closing database pool: {str(e)}")    
         else:
             logger.info("No database pool to close.")
+            
+    @classmethod
+    def _initialize_graph(cls):
+        """
+        Initialize the graph with the model and checkpointer.
+        """
+        if cls.graph is None:
+            logger.info("Initializing graph...")
+            workflow = StateGraph(state_schema=State)
+            workflow.add_edge(START, "model")
+            workflow.add_node("model", cls.call_model)
+            workflow.add_edge("model", END)
+            cls.graph = workflow.compile(checkpointer=cls.checkpointer)
+            cls._initialized = True
+            logger.info("Graph initialized.")
+        else:
+            logger.info("Graph already initialized.")        
 
     async def conversation(self, conversation_id:str ,user_input: str, user_context: Optional[str] = None) :
         """
