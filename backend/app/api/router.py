@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from core.models import ConversationPublic, MessageCreate, ConversationCreate, Conversation
 from core.session import get_session
-from core.crud import create_conversation, create_message, get_conversation_by_id, get_conversations_by_user_id
+from db.crud import create_conversation, create_message, get_conversation_by_id, get_conversations_by_user_id
 from core.dependencies import get_langchain_service 
 from services.llm import LangchainService
 from services.bedrock import BedrockService

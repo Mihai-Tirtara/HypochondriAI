@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from api.router import router
 from config.config import settings
-from core.db import init_db
+from db.initial_setup import init_db
 import logging
 from services.llm import LangchainService
 import boto3
