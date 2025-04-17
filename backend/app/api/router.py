@@ -4,8 +4,6 @@ from core.models import ConversationPublic, MessageCreate, ConversationCreate, C
 from db.crud import create_conversation, create_message, get_conversation_by_id, get_conversations_by_user_id
 from core.dependencies import get_langchain_service,get_session
 from services.llm import LangchainService
-from services.bedrock import BedrockService
-from prompts.prompt_utils import generate_health_anxiety_prompt
 import logging
 from sqlmodel import Session
 from uuid import UUID
