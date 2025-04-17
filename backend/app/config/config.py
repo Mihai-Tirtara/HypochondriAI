@@ -16,11 +16,6 @@ class Settings(BaseSettings):
     API_HOST:str = "0.0.0.0"
     API_PORT: int = 8000
     
-    # Langsmith settings 
-    #LANGSMITH_TRACING = "true"
-    #LANGSMITH_ENDPOINT = "https://api.smith.langchain.com"
-    #LANGSMITH_API_KEY = "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"
-    #LANGSMITH_PROJECT ="HyphochondriAI"
     
     # AWS settings
     AWS_ACCESS_KEY_ID: Optional[str] = None
