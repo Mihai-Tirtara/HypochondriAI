@@ -139,7 +139,14 @@ class LangchainService:
                     "autocommit": True,
                     "prepare_threshold": 0,
                 }
-                cls.db_pool = AsyncConnectionPool(conninfo=str(settings.SQLALCHEMY_DATABASE_URI), max_size=20, max_idle=60, open=False, kwargs=connection_kwargs)
+                conninfo_str = (
+                    f"dbname={settings.DB_NAME} "
+                    f"user={settings.DB_USERNAME} "
+                    f"password={settings.DB_PASSWORD} "
+                    f"host={settings.DB_HOST} "
+                    f"port={settings.DB_PORT}"
+                )
+                cls.db_pool = AsyncConnectionPool(conninfo=conninfo_str, max_size=20, max_idle=60, open=False, kwargs=connection_kwargs)
                 await cls.db_pool.open()
                 logger.info("Database pool initialized.")
             except Exception as e:
