@@ -1,6 +1,8 @@
 import logging
 from fastapi import Depends, HTTPException
 from services.llm import LangchainService # Import the service class
+from typing import Generator
+from sqlmodel import Session, create_engine
 
 logger = logging.getLogger(__name__)
 
@@ -18,3 +20,20 @@ def get_langchain_service() -> LangchainService:
         )
     # Return a new, lightweight instance. It uses the shared class resources.
     return LangchainService()
+
+# Use the database URL from your settings
+engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI), pool_pre_ping=True)
+# Create a configured "Session" class
+# Dependency function to get a DB session
+def get_session() -> Generator[Session, None, None]:
+    """
+    Dependency function that yields a SQLModel session.
+    Ensures the session is closed afterwards.
+    """
+    with Session(engine) as session:
+        try:
+            yield session
+        finally:
+            pass
+        
+        
