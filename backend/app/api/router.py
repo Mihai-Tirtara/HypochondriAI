@@ -7,7 +7,7 @@ from services.llm import LangchainService
 import logging
 from sqlmodel import Session
 from uuid import UUID
-from utils import saveConversation,saveMessage, serialise_message_data
+from api.utils import saveConversation,saveMessage, serialise_message_data
 
 
 router = APIRouter(

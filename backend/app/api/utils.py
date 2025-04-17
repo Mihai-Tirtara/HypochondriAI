@@ -3,7 +3,7 @@ from sqlmodel import Session
 from uuid import UUID
 from typing import Optional, Dict, Any
 from core.models import Conversation, Message, MessageCreate, ConversationCreate
-from core.crud import create_conversation
+from db.crud import create_conversation,create_message
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)

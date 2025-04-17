@@ -3,8 +3,8 @@ from core.models import User, UserCreate
 from config.config import settings
 
 
-from core.session import engine # Import engine directly
-from core.crud import create_user
+from core.dependencies import engine # Import engine directly
+from db.crud import create_user
 from sqlmodel import Session, select
 
 import logging
