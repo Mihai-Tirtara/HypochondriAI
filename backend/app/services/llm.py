@@ -137,21 +137,6 @@ class LangchainService:
                 await cls.db_pool.close() # Close pool if created but setup failed
                 cls.db_pool = None
 
-        """"
-        # Initialize chekpointer
-        logger.info("Initializing checkpointer...")
-        async with AsyncPostgresSaver.from_conn_string(str(settings.SQLALCHEMY_DATABASE_URI) + "?keepalives_idle=60") as checkpointer:
-            cls.checkpointer = checkpointer
-            logger.info(f"DEBUG: Type of cls.checkpointer after assignment: {type(cls.checkpointer)}")
-            try:
-                await cls.checkpointer.setup()
-                logger.info("Checkpointer initialized.")
-            except Exception as e:
-                logger.error(f"Error initializing checkpointer: {str(e)}")
-                logger.info("Falling back to MemorySaver.")
-                cls.checkpointer = MemorySaver()
-                raise
-        """
         #Initialize the graph
         logger.info("Initializing graph...")
         workflow = StateGraph(state_schema=State)
@@ -162,6 +147,7 @@ class LangchainService:
         cls._initialized = True
         logger.info("Graph compiled.")
         
+    @classmethod    
     async def close_pool(cls):
         """
         Close the pool and any resources it holds.

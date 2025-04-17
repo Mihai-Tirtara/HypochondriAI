@@ -38,3 +38,8 @@ def get_conversations_by_user_id(*, session: Session, user_id: uuid.UUID) -> Lis
     statement = select(Conversation).where(Conversation.user_id == user_id)
     conversations = session.exec(statement).all()
     return conversations
+
+def check_conversation_exists(*, session: Session, conversation_id: uuid.UUID) -> bool:
+    """Check if a conversation exists by its ID."""
+    statement = select(Conversation).where(Conversation.id == conversation_id)
+    return session.exec(statement).first() is not None
