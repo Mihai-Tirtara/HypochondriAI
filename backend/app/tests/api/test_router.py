@@ -255,4 +255,118 @@ def test_continue_conversation_invalid_conversation_id(client: TestClient, sessi
     
     print("Test passed: Response contains the expected 'conversation not found' error")
     
-            
+def test_get_conversations(client: TestClient, session: Session, test_user: User):
+    """
+    Test the /v1/conversations endpoint to get all conversations for a user.
+    """
+    # Arrange
+    user_id = test_user.id  # Assuming you have a test user created in your fixtures
+    # Create a conversation and a message in the database for the test
+    conversation = Conversation(user_id=user_id, title="Test Conversation")
+    session.add(conversation)
+    session.commit()
+    session.refresh(conversation)
+    
+
+    #Act 
+    response = client.get("/v1/conversations", params={"user_id": user_id})
+    
+    #Assert
+    assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()
+    
+    # Assert the response structure
+    assert isinstance(response_data, list), "Expected a list of conversations"
+    
+    # Check if the conversation is in the response
+    assert len(response_data) == 1, f"Expected 1 conversation, got {len(response_data)}"
+    
+    # Check conversation details
+    assert response_data[0]["id"] == str(conversation.id), f"Expected conversation ID {conversation.id}, got {response_data[0]['id']}"
+    assert response_data[0]["user_id"] == str(user_id), f"Expected user ID {user_id}, got {response_data[0]['user_id']}"	
+    print("Test passed: Response contains the expected conversations")   
+    
+def test_get_conversations_no_conversations(client: TestClient, session: Session, test_user: User):
+    """
+    Test the /v1/conversations endpoint when there are no conversations for a user.
+    """
+    # Arrange
+    user_id = test_user.id  # Assuming you have a test user created in your fixtures
+    
+    #Act 
+    response = client.get("/v1/conversations", params={"user_id": user_id})
+    
+    #Assert
+    assert response.status_code == 404, f"Expected status code 404, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()
+    
+    # Assert the error structure
+    assert 'detail' in response_data, "Response missing 'detail' field"
+    
+    # Assert the error message
+    assert response_data['detail'] == "No conversations found", f"Expected 'No conversations found', got '{response_data['detail']}'"
+    
+    print("Test passed: Response contains the expected 'no conversations found' error")             
+    
+def test_get_conversations_missing_user_id(client: TestClient, session: Session):
+    """
+    Test the /v1/conversations endpoint with a missing user_id parameter.
+    """
+    # Arrange
+    #Act 
+    response = client.get("/v1/conversations")
+    
+    #Assert
+    assert response.status_code == 422, f"Expected status code 422, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()
+    
+    # Assert the error structure
+    assert 'detail' in response_data, "Response missing 'detail' field"
+    assert isinstance(response_data['detail'], list), "'detail' is not a list"
+    assert len(response_data['detail']) > 0, "'detail' list is empty"
+    
+    # Find the specific user_id error
+    user_id_error = None
+    for error in response_data['detail']:
+        if error.get('loc') == ['query', 'user_id']:
+            user_id_error = error
+            break
+    
+    # Assert that we found the user_id error
+    assert user_id_error is not None, "user_id error not found in response"
+    
+    # Verify each component of the error
+    assert user_id_error['type'] == 'missing', f"Expected 'missing', got '{user_id_error['type']}'"
+    assert user_id_error['msg'] == 'Field required', f"Expected 'Field required', got '{user_id_error['msg']}'"
+    assert user_id_error['input'] is None, f"Expected None, got {user_id_error['input']}"
+    
+    print("Test passed: Response contains the expected 'missing user_id' error")    
+
+def test_get_conversations_invalid_user_id(client: TestClient, session: Session):
+    """
+    Test the /v1/conversations endpoint with an invalid user_id parameter.
+    """
+    # Arrange
+    invalid_user_id = str(uuid.uuid4())  # Generate a random UUID that doesn't exist in the database
+    
+    #Act 
+    response = client.get("/v1/conversations", params={"user_id": invalid_user_id})
+    
+    #Assert
+    assert response.status_code == 404, f"Expected status code 404, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()
+    # Assert the error structure
+    assert 'detail' in response_data, "Response missing 'detail' field"
+    
+    # Assert the error message
+    assert response_data['detail'] == "User not found", f"Expected 'User not found', got '{response_data['detail']}'"
+    
+    print("Test passed: Response contains the expected 'user not found' error")

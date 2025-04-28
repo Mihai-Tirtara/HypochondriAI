@@ -95,6 +95,9 @@ async def get_conversations(user_id: UUID = Query(...), db: Session = Depends(ge
     Returns:
         List[ConversationPublic]: A list of conversations for the user.
     """
+    if check_user_exists(session=db, user_id=user_id) == False:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     conversations = get_conversations_by_user_id(session=db, user_id=user_id)
     if not conversations:
         raise HTTPException(status_code=404, detail="No conversations found")
