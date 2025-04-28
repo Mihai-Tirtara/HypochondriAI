@@ -10,14 +10,12 @@ from app.services.llm import LangchainService
 def test_start_conversation(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
     
     #Arrange
-    
     user_id = test_user.id  # Assuming you have a test user created in your fixtures
     user_content = "Hello, how are you?"
     user_role = "user"
     request_data = { "content": user_content, "role": user_role}
     expected_AI_response = { "content": f"AI response to:{user_content}", "role": "assistant"}
-    message_data = expected_AI_response.copy() # In the real implementation, this would be the serialized data from the AI response.
-    
+    message_data = {'id': None, 'name': None, 'type': 'ai', 'content': f"AI response to:{user_content}", 'example': False, 'tool_calls': [], 'usage_metadata': None, 'additional_kwargs': {}, 'response_metadata': {}, 'invalid_tool_calls': []}
     
     #Act 
     response = client.post("/v1/new", json=request_data, params={"user_id": user_id})
@@ -147,7 +145,8 @@ def test_continue_conversation(client: TestClient, session: Session, mock_langch
     request_data = { "content": user_content, "role": user_role}
     
     expected_AI_response = { "content": f"AI response to:{user_content}", "role": "assistant"}
-    expected_AI_response_metadata = expected_AI_response.copy() # In the real implementation, this would be the serialized data from the AI response.
+    expected_AI_response_metadata = {'id': None, 'name': None, 'type': 'ai', 'content': f"AI response to:{user_content}", 'example': False, 'tool_calls': [], 'usage_metadata': None, 'additional_kwargs': {}, 'response_metadata': {}, 'invalid_tool_calls': []}
+
     
     #Act 
     response = client.post("/v1/conversations", json=request_data, params={"conversation_id": conversation_id})
@@ -187,7 +186,7 @@ def test_continue_conversation(client: TestClient, session: Session, mock_langch
     assert db_conversation.messages[1].message_data is None, "Expected user message data to be None"
     assert db_conversation.messages[2].role == "assistant", "Expected assistant message role in conversation"
     assert db_conversation.messages[2].content == expected_AI_response["content"], f"Expected assistant message content {expected_AI_response['content']}, got {db_conversation.messages[1].content}"
-    assert db_conversation.messages[2].message_data == expected_AI_response_metadata, f"Expected assistant message data {expected_AI_response_metadata}, got {db_conversation.messages[1].message_data}"
+    assert db_conversation.messages[2].message_data == expected_AI_response_metadata, f"Expected assistant message data {expected_AI_response_metadata}, got {db_conversation.messages[2].message_data}"
     print("Test passed: Response contains the expected conversation")
     
 def test_continue_conversation_missing_conversation_id(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
@@ -370,3 +369,173 @@ def test_get_conversations_invalid_user_id(client: TestClient, session: Session)
     assert response_data['detail'] == "User not found", f"Expected 'User not found', got '{response_data['detail']}'"
     
     print("Test passed: Response contains the expected 'user not found' error")
+    
+def test_start_conversation_invalid_UUUID(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/new endpoint with a user_id in invalid format.
+    """
+    # Arrange
+    invalid_user_id = "invalid-uuid"  # Invalid UUID format
+    user_content = "Hello, I have an invalid user_ID"
+    user_role = "user"
+    request_data = { "content": user_content, "role": user_role}
+    
+    # Act
+    response = client.post("/v1/new", json=request_data, params={"user_id": invalid_user_id})
+    
+    #Assert
+    assert response.status_code == 422, f"Expected status code 422, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()
+    print(response_data)
+    
+    assert 'detail' in response_data, "Response missing 'detail' field"
+    assert isinstance(response_data['detail'], list), "'detail' is not a list"
+    assert len(response_data['detail']) > 0, "'detail' list is empty"
+    
+    # Find the specific user_id error
+    user_id_error = None
+    for error in response_data['detail']:
+        if error.get('loc') == ['query', 'user_id']:
+            user_id_error = error
+            break
+    
+    # Assert that we found the user_id error
+    assert user_id_error is not None, "user_id error not found in response"
+    
+    # Verify each component of the error
+    assert user_id_error['type'] == 'uuid_parsing', f"Expected 'uuid_parsing', got '{user_id_error['type']}'"
+    assert 'Input should be a valid UUID, invalid character' in user_id_error['msg']  , f"Expected 'Input should be a valid UUID, invalid character', got '{user_id_error['msg']}'"
+        
+    print("Test passed: Response contains the expected 'invalid UUID format' error")
+
+def test_start_conversation_invalid_json_payload(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/new endpoint with an invalid JSON payload.
+    """
+    # Arrange
+    user_id = test_user.id  # Assuming you have a test user created in your fixtures
+    invalid_payload = "{ 'content': 'Hello, I have an invalid payload' }"  # Invalid JSON format
+    
+    # Act
+    response = client.post("/v1/new", json=invalid_payload, params={"user_id": user_id})
+    
+    #Assert
+    assert response.status_code == 422, f"Expected status code 422, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()
+    
+    # Find the specific json validation error
+    json_error = None
+    for error in response_data['detail']:
+        if error.get('loc') == ['body']:
+            json_error = error
+            break
+    
+    # Assert that we found the json_error
+    assert json_error is not None, "json_error not found in response"
+    
+    # Verify each component of the error
+    assert json_error['type'] == 'model_attributes_type', f"Expected 'model_attributes_type', got '{json_error['type']}'"
+    assert 'Input should be a valid dictionary' in json_error['msg']  , f"Expected 'Input should be a valid dictionary', got '{json_error['msg']}'"
+    
+    print("Test passed: Response contains the expected 'invalid JSON format' error")
+
+def test_continue_conversation_invalid_json_payload(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/conversations endpoint with an invalid JSON payload.
+    """
+    # Arrange
+    user_id = test_user.id  # Assuming you have a test user created in your fixtures
+    conversation = Conversation(user_id=user_id, title="Test Conversation")
+    session.add(conversation)
+    session.commit()
+    session.refresh(conversation)
+    
+    conversation_id = conversation.id
+    invalid_payload = "{ 'content': 'Hello, I have an invalid payload' }"  # Invalid JSON format
+    
+    # Act
+    response = client.post("/v1/conversations", json=invalid_payload, params={"conversation_id": conversation_id})
+    
+    #Assert
+    assert response.status_code == 422, f"Expected status code 422, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()
+    
+    # Find the specific json validation error
+    json_error = None
+    for error in response_data['detail']:
+        if error.get('loc') == ['body']:
+            json_error = error
+            break
+    
+    # Assert that we found the json_error
+    assert json_error is not None, "json_error not found in response"
+    
+    # Verify each component of the error
+    assert json_error['type'] == 'model_attributes_type', f"Expected 'model_attributes_type', got '{json_error['type']}'"
+    assert 'Input should be a valid dictionary' in json_error['msg']  , f"Expected 'Input should be a valid dictionary', got '{json_error['msg']}'"
+    
+    print("Test passed: Response contains the expected 'invalid JSON format' error")    
+
+def test_start_conversation_empty_payload(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/new endpoint with an empty payload.
+    """
+    # Arrange
+    user_id = test_user.id  # Assuming you have a test user created in your fixtures
+    empty_payload = {}  # Empty JSON payload
+    
+    # Act
+    response = client.post("/v1/new", json=empty_payload, params={"user_id": user_id})
+    
+    #Assert
+    assert response.status_code == 422, f"Expected status code 422, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()    
+    # Find the specific json validation error
+    json_error = None
+    for error in response_data['detail']:
+        if error.get('loc') == ['body', 'content']:
+            json_error = error
+            break
+    
+    # Assert that we found the json_error
+    assert json_error is not None, "json_error not found in response"
+    
+    # Verify each component of the error
+    assert json_error['type'] == 'missing', f"Expected 'missing', got '{json_error['type']}'"
+    assert json_error['msg'] == "Field required" , f"Expected 'Field required', got '{json_error['msg']}'"
+    assert json_error['input'] == {}, f"Expected {{}}, got {json_error['input']}"
+    
+    print("Test passed: Response contains the expected 'empty payload' error")  
+    
+def test_start_conversation_empty_content(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/new endpoint with an empty content field.
+    """
+    # Arrange
+    user_id = test_user.id  # Assuming you have a test user created in your fixtures
+    empty_content_payload = { "content": "", "role": "user" }  # Empty content field
+    
+    # Act
+    response = client.post("/v1/new", json=empty_content_payload, params={"user_id": user_id})
+    
+    #Assert
+    assert response.status_code == 400, f"Expected status code 400, got {response.status_code}"
+    # Get the JSON response
+    response_data = response.json()
+    # Assert the error structure
+    assert 'detail' in response_data, "Response missing 'detail' field"
+    
+    # Assert the error message
+    assert response_data['detail'] == "Message content cannot be empty", f"Expected 'Message content cannot be empty', got '{response_data['detail']}'"
+    
+    print("Test passed: Response contains the expected 'user not found' error")
+    
+    

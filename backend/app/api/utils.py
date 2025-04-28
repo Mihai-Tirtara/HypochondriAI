@@ -44,6 +44,8 @@ def saveMessage(db:Session, conversation_id:UUID, content:str, role:str, message
     Returns:
         Message: The saved message object.
     """
+    if content is None or content == "":
+        raise HTTPException(status_code=400, detail="Message content cannot be empty")
     
     message_create = MessageCreate(
         content=content,

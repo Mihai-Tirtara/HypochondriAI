@@ -6,6 +6,8 @@ from unittest.mock import MagicMock, AsyncMock # Use AsyncMock for async methods
 import os
 import uuid
 from typing import Optional
+from langchain_core.messages.ai import AIMessage
+
 
 from app.main import app
 from app.core.dependencies import get_session, get_langchain_service
@@ -32,23 +34,37 @@ def session_fixture():
     
 @pytest.fixture(name="mock_langchain_service", scope="function")
 def mock_langchain_service_fixture():
+    original_initialized = LangchainService._initialized
+    original_graph = LangchainService.graph
+    original_model = LangchainService.model
+    original_pool = LangchainService.db_pool
+    original_checkpointer = LangchainService.checkpointer
     """Mock the LangchainService for testing."""
     mock_service = MagicMock(spec=LangchainService)
     
     async def mock_conversation(conversation_id: str, user_input: str, user_context: Optional[str] = None):
         # Mock the conversation method to return a fixed response
-        mock_response = MagicMock()
-        mock_response.content = f"AI response to:{user_input}"
-        mock_response.model_dump = MagicMock(return_value={"content": mock_response.content, "role": "assistant"})
-        return mock_response
+        # Save original class attributes to restore later
+        
+        response = AIMessage(content=f"AI response to:{user_input}")
+        return response
     
     mock_service.conversation = AsyncMock(side_effect=mock_conversation)
     
     LangchainService._initialized = True  # Set the initialized flag to True
+    LangchainService.graph = MagicMock()
+    LangchainService.model = MagicMock()
+    LangchainService.checkpointer = MagicMock()
+    LangchainService.db_pool = AsyncMock()
     
     yield mock_service
     
     LangchainService._initialized = False  # Reset the initialized flag after tests
+    LangchainService.graph = original_graph
+    LangchainService.model = original_model
+    LangchainService.checkpointer = original_checkpointer
+    LangchainService.db_pool = original_pool
+    # Reset the mock service to its original state
     
 @pytest.fixture(name="client", scope="function")
 def client_fixture(session: Session, mock_langchain_service: LangchainService):
