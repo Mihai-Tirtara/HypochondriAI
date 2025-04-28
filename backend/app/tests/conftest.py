@@ -39,7 +39,7 @@ def mock_langchain_service_fixture():
         # Mock the conversation method to return a fixed response
         mock_response = MagicMock()
         mock_response.content = f"AI response to:{user_input}"
-        mock_response.model_dump = MagicMock(return_value={"content": mock_response.content, "role": "assistant", "message_data": "mock_data"})
+        mock_response.model_dump = MagicMock(return_value={"content": mock_response.content, "role": "assistant"})
         return mock_response
     
     mock_service.conversation = AsyncMock(side_effect=mock_conversation)

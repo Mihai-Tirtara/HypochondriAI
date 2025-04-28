@@ -15,7 +15,9 @@ def test_start_conversation(client: TestClient, session: Session, mock_langchain
     user_content = "Hello, how are you?"
     user_role = "user"
     request_data = { "content": user_content, "role": user_role}
-    expected_AI_response = { "content": f"AI response to:{user_content}", "role": "assistant", "message_data": "mock_data"}
+    expected_AI_response = { "content": f"AI response to:{user_content}", "role": "assistant"}
+    message_data = expected_AI_response.copy() # In the real implementation, this would be the serialized data from the AI response.
+    
     
     #Act 
     response = client.post("/v1/new", json=request_data, params={"user_id": user_id})
@@ -54,7 +56,8 @@ def test_start_conversation(client: TestClient, session: Session, mock_langchain
     assert db_conversation.messages[0].content == request_data["content"], f"Expected user message content {request_data['content']}, got {db_conversation.messages[0].content}"
     assert db_conversation.messages[1].role == "assistant", "Expected assistant message role in conversation"
     assert db_conversation.messages[1].content == expected_AI_response["content"], f"Expected assistant message content {expected_AI_response['content']}, got {db_conversation.messages[1].content}"
-    #assert db_conversation.messages[1].message_data == expected_AI_response["message_data"], f"Expected assistant message data {expected_AI_response['message_data']}, got {db_conversation.messages[1].message_data}"
+    print(db_conversation.messages[1])
+    assert db_conversation.messages[1].message_data == message_data, f"Expected assistant message data {message_data}, got {db_conversation.messages[1].message_data}"
     print("Test passed: Response contains the expected conversation")
     
 def test_start_conversation_missing_user_id(client: TestClient, session: Session, mock_langchain_service: MagicMock):
@@ -121,5 +124,135 @@ def test_start_conversation_invalid_user_id(client: TestClient, session: Session
     assert response_data['detail'] == "User not found", f"Expected 'User not found', got '{response_data['detail']}'"
     
     print("Test passed: Response contains the expected 'user not found' error")
+
+def test_continue_conversation(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/conversations endpoint to continue an existing conversation.
+    """
+    # Arrange
+    user_id = test_user.id  # Assuming you have a test user created in your fixtures
+    # Create a conversation and a message in the database for the test
+    conversation = Conversation(user_id=user_id, title="Test Conversation")
+    session.add(conversation)
+    session.commit()
+    session.refresh(conversation)
+    first_message = Message(conversation_id=conversation.id, content="Hello, how are you?", role="user")
+    session.add(first_message)
+    session.commit()
+    session.refresh(first_message)
     
-        
+    conversation_id = conversation.id
+    user_content = "Hello, I want to continue the conversation."
+    user_role = "user"
+    request_data = { "content": user_content, "role": user_role}
+    
+    expected_AI_response = { "content": f"AI response to:{user_content}", "role": "assistant"}
+    expected_AI_response_metadata = expected_AI_response.copy() # In the real implementation, this would be the serialized data from the AI response.
+    
+    #Act 
+    response = client.post("/v1/conversations", json=request_data, params={"conversation_id": conversation_id})
+    
+    #Assert
+    assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+    response_data = response.json()
+    
+    # Assert the response structure
+    assert "id" in response_data
+    assert response_data["user_id"] == str(user_id), f"Expected user_id {user_id}, got {response_data['user_id']}"
+    assert response_data["title"] == conversation.title, f"Expected title {conversation.title}, got {response_data['title']}"
+    assert "messages" in response_data, "Expected messages in response"
+    assert len(response_data["messages"]) == 3, f"Expected 3 messages, got {len(response_data['messages'])}"
+    
+    # Check user message details
+    assert response_data["messages"][1]["role"] == "user", "Expected user message role"
+    assert response_data["messages"][1]["content"] == request_data["content"], f"Expected user message content {request_data['content']}, got {response_data['messages'][2]['content']}"
+    
+    #Check AI message details
+    assert response_data["messages"][2]["role"] == "assistant", "Expected assistant message role"
+    assert response_data["messages"][2]["content"] == expected_AI_response["content"], f"Expected assistant message content {expected_AI_response['content']}, got {response_data['messages'][1]['content']}"
+    
+    mock_langchain_service.conversation.assert_awaited_once()
+    call_args  = mock_langchain_service.conversation.call_args
+    assert call_args[0][0] == str (response_data["id"]), f"Expected conversation ID {response_data['id']}, got {call_args[0][0]}"
+    assert call_args[0][1] == request_data["content"], f"Expected user input {request_data['content']}, got {call_args[0][1]}"
+    assert "user_context" not in call_args.kwargs, f"Expected the keyword argument 'user_context' to be not present if passed with None, got {call_args.kwargs}"
+    
+    db_conversation = session.get(Conversation, response_data["id"])
+    assert db_conversation is not None, "Expected conversation to be saved in the database"
+    assert db_conversation.user_id == user_id, f"Expected conversation user ID {user_id}, got {db_conversation.user_id}"
+    assert db_conversation.title == conversation.title, f"Expected conversation title {conversation.title}, got {db_conversation.title}"
+    assert len(db_conversation.messages) == 3, f"Expected 3 messages in conversation, got {len(db_conversation.messages)}"
+    assert db_conversation.messages[1].role == "user", "Expected user message role in conversation"
+    assert db_conversation.messages[1].content == request_data["content"], f"Expected user message content {request_data['content']}, got {db_conversation.messages[0].content}"
+    assert db_conversation.messages[1].message_data is None, "Expected user message data to be None"
+    assert db_conversation.messages[2].role == "assistant", "Expected assistant message role in conversation"
+    assert db_conversation.messages[2].content == expected_AI_response["content"], f"Expected assistant message content {expected_AI_response['content']}, got {db_conversation.messages[1].content}"
+    assert db_conversation.messages[2].message_data == expected_AI_response_metadata, f"Expected assistant message data {expected_AI_response_metadata}, got {db_conversation.messages[1].message_data}"
+    print("Test passed: Response contains the expected conversation")
+    
+def test_continue_conversation_missing_conversation_id(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/conversations endpoint with a missing conversation_id parameter.
+    """
+    # Arrange
+    user_content = "Hello, I have no conversation_ID"
+    user_role = "user"
+    request_data = { "content": user_content, "role": user_role}
+    
+    # Act
+    response = client.post("/v1/conversations", json=request_data)
+    
+    #Assert
+    assert response.status_code == 422, f"Expected status code 422, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()
+    
+    # Assert the error structure
+    assert 'detail' in response_data, "Response missing 'detail' field"
+    assert isinstance(response_data['detail'], list), "'detail' is not a list"
+    assert len(response_data['detail']) > 0, "'detail' list is empty"
+    
+    # Find the specific conversation_id error
+    conversation_id_error = None
+    for error in response_data['detail']:
+        if error.get('loc') == ['query', 'conversation_id']:
+            conversation_id_error = error
+            break
+    
+    # Assert that we found the conversation_id error
+    assert conversation_id_error is not None, "conversation_id error not found in response"
+    assert conversation_id_error['type'] == 'missing', f"Expected 'missing', got '{conversation_id_error['type']}'"
+    assert conversation_id_error['msg'] == 'Field required', f"Expected 'Field required', got '{conversation_id_error['msg']}'"
+    assert conversation_id_error['input'] is None, f"Expected None, got {conversation_id_error['input']}"
+    print("Test passed: Response contains the expected 'missing conversation_id' error")    
+
+def test_continue_conversation_invalid_conversation_id(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/conversations endpoint with an invalid conversation_id parameter.
+    """
+    # Arrange
+    user_id = test_user.id  # Assuming you have a test user created in your fixtures
+    invalid_conversation_id = str(uuid.uuid4())  # Generate a random UUID that doesn't exist in the database
+    user_content = "Hello, I have an invalid conversation_ID"
+    user_role = "user"
+    request_data = { "content": user_content, "role": user_role}
+    
+    # Act
+    response = client.post("/v1/conversations", json=request_data, params={"conversation_id": invalid_conversation_id})
+    
+    #Assert
+    assert response.status_code == 404, f"Expected status code 404, got {response.status_code}"
+    
+    # Get the JSON response
+    response_data = response.json()
+    
+    # Assert the error structure
+    assert 'detail' in response_data, "Response missing 'detail' field"
+    
+    # Assert the error message
+    assert response_data['detail'] == "Conversation not found", f"Expected 'Conversation not found', got '{response_data['detail']}'"
+    
+    print("Test passed: Response contains the expected 'conversation not found' error")
+    
+            
