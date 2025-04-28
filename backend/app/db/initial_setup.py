@@ -1,10 +1,10 @@
 from sqlmodel import SQLModel, create_engine
-from core.models import User, UserCreate
-from config.config import settings
+from app.core.models import User, UserCreate
+from app.config.config import settings
 
 
-from core.dependencies import engine # Import engine directly
-from db.crud import create_user
+from app.core.dependencies import engine # Import engine directly
+from app.db.crud import create_user
 from sqlmodel import Session, select
 
 import logging

@@ -3,7 +3,11 @@ from typing import Optional
 from pydantic_core import MultiHostUrl
 from typing_extensions import Self
 from pydantic import PostgresDsn, computed_field
+import os
 
+APP_ENV = os.getenv("APP_ENV", "development") 
+env_file = ".env.test" if APP_ENV == "test" else ".env"
+print(f"Using environment file: {env_file}")
 
 class Settings(BaseSettings):
     # App settings
@@ -34,7 +38,7 @@ class Settings(BaseSettings):
     DB_PORT: int = 5432
     DB_USERNAME:  Optional[str] = None
     DB_PASSWORD:  Optional[str] = None
-    DB_NAME: str = "health_anxiety"
+    DB_NAME: Optional[str] = None
     DB_SUPERUSER_USERNAME: Optional[str] = None
     DB_SUPERUSER_PASSWORD: Optional[str] = None
     DB_SUPERUSER_EMAIL: Optional[str] = None
@@ -63,6 +67,14 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     
     class Config:
-        env_file = ".env"
+        env_file = env_file
 
 settings = Settings()
+
+print("-" * 20)
+print(f"DEBUG (config.py): APP_ENV='{os.getenv('APP_ENV')}'") # Check APP_ENV directly
+print(f"DEBUG (config.py): Loading from env_file='{Settings.Config.env_file}'") # Check which file it *thinks* it loaded
+print(f"DEBUG (config.py): settings.DB_USERNAME = '{settings.DB_USERNAME}'") # <-- Is this None?
+print(f"DEBUG (config.py): settings.DB_PASSWORD = '{settings.DB_PASSWORD}'") # <-- Is this None?
+print(f"DEBUG (config.py): settings.SQLALCHEMY_DATABASE_URI = '{settings.SQLALCHEMY_DATABASE_URI}'")
+print("-" * 20)

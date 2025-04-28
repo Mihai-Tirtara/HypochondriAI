@@ -1,13 +1,13 @@
 
 from fastapi import APIRouter, HTTPException, Depends, Query
-from core.models import ConversationPublic, MessageCreate, ConversationCreate, Conversation
-from db.crud import create_conversation, create_message, get_conversation_by_id, get_conversations_by_user_id,check_conversation_exists
-from core.dependencies import get_langchain_service,get_session
-from services.llm import LangchainService
+from app.core.models import ConversationPublic, MessageCreate, ConversationCreate, Conversation
+from app.db.crud import create_conversation, create_message, get_conversation_by_id, get_conversations_by_user_id,check_conversation_exists, check_user_exists
+from app.core.dependencies import get_langchain_service,get_session
+from app.services.llm import LangchainService
 import logging
 from sqlmodel import Session
 from uuid import UUID
-from api.utils import saveConversation,saveMessage, serialise_message_data
+from app.api.utils import saveConversation,saveMessage, serialise_message_data
 from typing import List
 
 
@@ -33,6 +33,9 @@ async def start_conversation(query: MessageCreate, user_id:UUID = Query(...), db
     Returns:
         ConversationPublic: The created conversation object.    
     """
+    if check_user_exists(session=db, user_id=user_id) == False:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     # At the moment just save the title of the conversation as the first 20 characters of the query content
     # In the future, we can use the query content to generate a more meaningful title
     new_conversation = saveConversation(db=db, user_id = user_id, title=query.content[:20])

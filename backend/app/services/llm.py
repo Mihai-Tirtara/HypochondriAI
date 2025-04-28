@@ -6,12 +6,12 @@ from typing_extensions import Annotated, TypedDict
 from langchain.chat_models import init_chat_model
 from langgraph.graph import START, END, MessagesState, StateGraph
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from prompts.prompt_utils import generate_health_anxiety_prompt
+from app.prompts.prompt_utils import generate_health_anxiety_prompt
 from langgraph.checkpoint.memory import MemorySaver 
 from psycopg_pool import AsyncConnectionPool
 import logging
 import boto3
-from config.config import settings
+from app.config.config import settings
 logger = logging.getLogger(__name__)
 
 

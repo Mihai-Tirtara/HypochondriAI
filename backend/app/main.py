@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException
-from api.router import router
-from config.config import settings
-from db.initial_setup import init_db
+from app.api.router import router
+from app.config.config import settings
+from app.db.initial_setup import init_db
 import logging
-from services.llm import LangchainService
+from app.services.llm import LangchainService
 import boto3
 
 
@@ -26,7 +26,7 @@ app = FastAPI(
 async def on_startup():
     logger.info("Running DB initialization...")
     try:
-        init_db()
+        #init_db()
         logger.info("DB initialization complete.")
     except Exception as e:
         logger.error(f"Error during database initilizations  {e}")

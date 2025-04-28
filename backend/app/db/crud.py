@@ -4,8 +4,8 @@ from typing import Any,List
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
 
-from core.security import get_password_hash, verify_password
-from core.models import User, UserCreate, UserPublic, Conversation, ConversationCreate, Message, MessageCreate
+from app.core.security import get_password_hash, verify_password
+from app.core.models import User, UserCreate, UserPublic, Conversation, ConversationCreate, Message, MessageCreate
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     user_db = User.model_validate(user_create, update={"password_hash": get_password_hash(user_create.password)} )
@@ -43,3 +43,8 @@ def check_conversation_exists(*, session: Session, conversation_id: uuid.UUID) -
     """Check if a conversation exists by its ID."""
     statement = select(Conversation).where(Conversation.id == conversation_id)
     return session.exec(statement).first() is not None
+def check_user_exists(*, session: Session, user_id: uuid.UUID) -> bool:
+    """Check if a user exists by its ID."""
+    statement = select(User).where(User.id == user_id)
+    return session.exec(statement).first() is not None
+

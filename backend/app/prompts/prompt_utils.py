@@ -1,5 +1,5 @@
 from typing import Optional
-from prompts.health_anxiety_prompt_template import HEALTH_ANXIETY_BASE_PROMPT
+from app.prompts.health_anxiety_prompt_template import HEALTH_ANXIETY_BASE_PROMPT
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 def generate_health_anxiety_prompt(user_context: Optional[str] = None) :

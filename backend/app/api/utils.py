@@ -2,8 +2,8 @@ import logging
 from sqlmodel import Session
 from uuid import UUID
 from typing import Optional, Dict, Any
-from core.models import Conversation, Message, MessageCreate, ConversationCreate
-from db.crud import create_conversation,create_message
+from app.core.models import Conversation, Message, MessageCreate, ConversationCreate
+from app.db.crud import create_conversation,create_message
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def saveConversation(db:Session, user_id:UUID, title:Optional[str]) -> Conversat
     """
     
     conversation = ConversationCreate(title=title)
-    db_conversation = create_conversation(session=db, conversation_create=conversation, user_id=userId)
+    db_conversation = create_conversation(session=db, conversation_create=conversation, user_id=user_id)
     if not db_conversation:
         raise HTTPException(status_code=500, detail="Failed to create conversation") 
     logger.info(f"Created new conversation with ID: {db_conversation.id}")

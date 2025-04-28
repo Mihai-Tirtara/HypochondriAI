@@ -1,9 +1,9 @@
 import logging
 from fastapi import Depends, HTTPException
-from services.llm import LangchainService # Import the service class
+from app.services.llm import LangchainService # Import the service class
 from typing import Generator
 from sqlmodel import Session, create_engine
-from config.config import settings
+from app.config.config import settings
 
 logger = logging.getLogger(__name__)
 
