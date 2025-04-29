@@ -1,7 +1,8 @@
 import uuid
+from enum import Enum
 from typing import List, Optional, Dict, Any # Use standard typing
 from datetime import datetime
-from sqlalchemy import func # Import func for SQLAlchemy functions
+from sqlalchemy import func, Enum as SQLAlchemyEnum
 from sqlalchemy.dialects.postgresql import JSONB # Keep this for JSONB type
 
 from sqlmodel import Field, Relationship, SQLModel, Column
@@ -29,10 +30,17 @@ class User(UserBase, table=True):
 
     conversations: List["Conversation"] = Relationship(back_populates="user")
     
-
+class MessageRole(str,Enum):
+    USER = "user"
+    ASSISTANT = "assistant"
+    SYSTEM = "system" # Add more roles as needed
+    
+    def __str__(self):
+        return self.value
+        
 class MessageBase(SQLModel):
     content: str = Field() 
-    role: str = Field(max_length=50) # e.g., 'user', 'assistant'
+    role: MessageRole = Field(sa_column=Column(SQLAlchemyEnum(MessageRole), nullable=False, name="messagerole")) 
     
 class MessageCreate(MessageBase):
     message_data: Optional[Dict[str, Any]] = None 

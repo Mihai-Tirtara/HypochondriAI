@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 from unittest.mock import AsyncMock, MagicMock
 
 # Import your models and schemas
-from app.core.models import User, Conversation, Message, MessageCreate
+from app.core.models import User, Conversation, Message, MessageCreate, MessageRole
 from app.services.llm import LangchainService
 
 def test_start_conversation(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
@@ -12,7 +12,7 @@ def test_start_conversation(client: TestClient, session: Session, mock_langchain
     #Arrange
     user_id = test_user.id  # Assuming you have a test user created in your fixtures
     user_content = "Hello, how are you?"
-    user_role = "user"
+    user_role = MessageRole.USER
     request_data = { "content": user_content, "role": user_role}
     expected_AI_response = { "content": f"AI response to:{user_content}", "role": "assistant"}
     message_data = {'id': None, 'name': None, 'type': 'ai', 'content': f"AI response to:{user_content}", 'example': False, 'tool_calls': [], 'usage_metadata': None, 'additional_kwargs': {}, 'response_metadata': {}, 'invalid_tool_calls': []}
@@ -64,7 +64,7 @@ def test_start_conversation_missing_user_id(client: TestClient, session: Session
     """
     # Arrange
     user_content = "Hello, I have no user_ID"
-    user_role = "user"
+    user_role = MessageRole.USER
     request_data = { "content": user_content, "role": user_role}
     
     # Act

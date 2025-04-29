@@ -2,7 +2,7 @@ import logging
 from sqlmodel import Session
 from uuid import UUID
 from typing import Optional, Dict, Any
-from app.core.models import Conversation, Message, MessageCreate, ConversationCreate
+from app.core.models import Conversation, Message, MessageCreate, ConversationCreate, MessageRole
 from app.db.crud import create_conversation,create_message
 from fastapi import HTTPException
 
@@ -30,7 +30,7 @@ def saveConversation(db:Session, user_id:UUID, title:Optional[str]) -> Conversat
     
     return db_conversation
 
-def saveMessage(db:Session, conversation_id:UUID, content:str, role:str, message_data:Optional[Dict[str, Any]] = None) -> Message:
+def saveMessage(db:Session, conversation_id:UUID, content:str, role:MessageRole, message_data:Optional[Dict[str, Any]] = None) -> Message:
     """
     Create the message object and save it to the database
     

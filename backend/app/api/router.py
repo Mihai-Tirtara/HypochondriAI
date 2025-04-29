@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter, HTTPException, Depends, Query
-from app.core.models import ConversationPublic, MessageCreate, ConversationCreate, Conversation
+from app.core.models import ConversationPublic, MessageCreate, ConversationCreate, Conversation, MessageRole
 from app.db.crud import create_conversation, create_message, get_conversation_by_id, get_conversations_by_user_id,check_conversation_exists, check_user_exists
 from app.core.dependencies import get_langchain_service,get_session
 from app.services.llm import LangchainService
@@ -9,6 +9,7 @@ from sqlmodel import Session
 from uuid import UUID
 from app.api.utils import saveConversation,saveMessage, serialise_message_data
 from typing import List
+
 
 
 router = APIRouter(
@@ -39,13 +40,13 @@ async def start_conversation(query: MessageCreate, user_id:UUID = Query(...), db
     # At the moment just save the title of the conversation as the first 20 characters of the query content
     # In the future, we can use the query content to generate a more meaningful title
     new_conversation = saveConversation(db=db, user_id = user_id, title=query.content[:20])
-    user_message = saveMessage(db=db, conversation_id=new_conversation.id, content=query.content, role="user", message_data=None)
+    user_message = saveMessage(db=db, conversation_id=new_conversation.id, content=query.content, role=MessageRole.USER, message_data=None)
     ai_response = await langchain_service.conversation(str(new_conversation.id), user_message.content)
     if not ai_response:
         raise HTTPException(status_code=500, detail="Failed to get AI response")
     logger.info(f"Received AI response: {ai_response}")
     ai_response_metadata = serialise_message_data(ai_response)
-    ai_message = saveMessage(db=db, conversation_id=new_conversation.id, content=ai_response.content, role="assistant", message_data=ai_response_metadata)
+    ai_message = saveMessage(db=db, conversation_id=new_conversation.id, content=ai_response.content, role=MessageRole.ASSISTANT, message_data=ai_response_metadata)
     #Return the newly created conversation with the messages
     conversation = get_conversation_by_id(session=db, conversation_id=new_conversation.id)
     if not conversation:
