@@ -54,7 +54,6 @@ def test_start_conversation(client: TestClient, session: Session, mock_langchain
     assert db_conversation.messages[0].content == request_data["content"], f"Expected user message content {request_data['content']}, got {db_conversation.messages[0].content}"
     assert db_conversation.messages[1].role == "assistant", "Expected assistant message role in conversation"
     assert db_conversation.messages[1].content == expected_AI_response["content"], f"Expected assistant message content {expected_AI_response['content']}, got {db_conversation.messages[1].content}"
-    print(db_conversation.messages[1])
     assert db_conversation.messages[1].message_data == message_data, f"Expected assistant message data {message_data}, got {db_conversation.messages[1].message_data}"
     print("Test passed: Response contains the expected conversation")
     
@@ -537,5 +536,3 @@ def test_start_conversation_empty_content(client: TestClient, session: Session, 
     assert response_data['detail'] == "Message content cannot be empty", f"Expected 'Message content cannot be empty', got '{response_data['detail']}'"
     
     print("Test passed: Response contains the expected 'user not found' error")
-    
-    

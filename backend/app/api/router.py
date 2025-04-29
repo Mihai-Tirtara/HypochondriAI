@@ -7,7 +7,7 @@ from app.services.llm import LangchainService
 import logging
 from sqlmodel import Session
 from uuid import UUID
-from app.api.utils import saveConversation,saveMessage, serialise_message_data
+from app.api.utils import saveConversation,saveMessage, serialise_message_data,create_title
 from typing import List
 
 
@@ -37,9 +37,7 @@ async def start_conversation(query: MessageCreate, user_id:UUID = Query(...), db
     if check_user_exists(session=db, user_id=user_id) == False:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # At the moment just save the title of the conversation as the first 20 characters of the query content
-    # In the future, we can use the query content to generate a more meaningful title
-    new_conversation = saveConversation(db=db, user_id = user_id, title=query.content[:20])
+    new_conversation = saveConversation(db=db, user_id = user_id, title=create_title(query.content))
     user_message = saveMessage(db=db, conversation_id=new_conversation.id, content=query.content, role=MessageRole.USER, message_data=None)
     ai_response = await langchain_service.conversation(str(new_conversation.id), user_message.content)
     if not ai_response:

@@ -85,3 +85,18 @@ def serialise_message_data(aiResponse:Any) -> Optional[Dict[str, Any]]:
         message_data_dict = {"error": f"Serialization failed: {e}", "content": aiResponse.content}
     
     return message_data_dict
+
+def create_title(content:str):
+
+    """
+    Create a title for the conversation based on the content.
+    At the moment just save the title of the conversation as the first 20 characters of the query content
+    In the future, we can use the query content to generate a more meaningful title
+    Args:
+        content (str): The content of the message.
+
+    Returns:
+        str: The generated title.
+    """
+    title = content[:20] if len(content) > 20 else content
+    return title
