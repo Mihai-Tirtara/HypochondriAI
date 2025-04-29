@@ -536,3 +536,63 @@ def test_start_conversation_empty_content(client: TestClient, session: Session, 
     assert response_data['detail'] == "Message content cannot be empty", f"Expected 'Message content cannot be empty', got '{response_data['detail']}'"
     
     print("Test passed: Response contains the expected 'user not found' error")
+    
+def test_start_conversation_langchain_error(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/new endpoint when the Langchain service raises an exception.
+    """
+    # Arrange
+    user_id = test_user.id
+    user_content = "Hello, how are you?"
+    user_role = MessageRole.USER
+    request_data = {"content": user_content, "role": user_role}
+    
+    # For async methods, we need to make the side_effect an async function that raises an exception
+    async def mock_async_error(*args, **kwargs):
+        raise Exception("Langchain service error")
+    
+    # Configure mock to raise an exception
+    mock_langchain_service.conversation.side_effect = mock_async_error
+    
+    # Act 
+    response = client.post("/v1/new", json=request_data, params={"user_id": user_id})
+    
+    # Assert
+    assert response.status_code == 500, f"Expected status code 500, got {response.status_code}"
+    response_data = response.json()
+    
+    # Assert the error structure
+    assert 'detail' in response_data, "Response missing 'detail' field"
+    assert "error" in response_data['detail'].lower(), f"Expected error message, got '{response_data['detail']}'"
+    
+    # Verify the mock was called
+    mock_langchain_service.conversation.assert_awaited_once()
+    
+    print("Test passed: Response contains the expected Langchain service error")    
+    
+def test_start_conversation_langchain_not_initialized(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
+    """
+    Test the /v1/new endpoint when the Langchain service raises an exception.
+    """
+    # Arrange
+    user_id = test_user.id
+    user_content = "Hello, how are you?"
+    user_role = MessageRole.USER
+    request_data = {"content": user_content, "role": user_role}    
+    
+    # Configure mock to raise an exception
+    mock_langchain_service.initialized = False
+    mock_langchain_service.conversation.side_effect = Exception("Langchain service not initialized")
+    
+    # Act 
+    response = client.post("/v1/new", json=request_data, params={"user_id": user_id})
+    
+    # Assert
+    assert response.status_code == 500, f"Expected status code 500, got {response.status_code}"
+    response_data = response.json()
+    
+    # Assert the error structure
+    assert 'detail' in response_data, "Response missing 'detail' field"
+    assert "error" in response_data['detail'].lower(), f"Expected error message, got '{response_data['detail']}'"
+    
+    print("Test passed: Response contains the expected Langchain service error when not initialized")    

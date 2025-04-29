@@ -7,7 +7,7 @@ from app.services.llm import LangchainService
 import logging
 from sqlmodel import Session
 from uuid import UUID
-from app.api.utils import saveConversation,saveMessage, serialise_message_data,create_title
+from app.api.utils import saveConversation,saveMessage, serialise_message_data,create_title,get_and_save_ai_response,cleanup_conversation
 from typing import List
 
 
@@ -39,12 +39,13 @@ async def start_conversation(query: MessageCreate, user_id:UUID = Query(...), db
     
     new_conversation = saveConversation(db=db, user_id = user_id, title=create_title(query.content))
     user_message = saveMessage(db=db, conversation_id=new_conversation.id, content=query.content, role=MessageRole.USER, message_data=None)
-    ai_response = await langchain_service.conversation(str(new_conversation.id), user_message.content)
-    if not ai_response:
-        raise HTTPException(status_code=500, detail="Failed to get AI response")
-    logger.info(f"Received AI response: {ai_response}")
-    ai_response_metadata = serialise_message_data(ai_response)
-    ai_message = saveMessage(db=db, conversation_id=new_conversation.id, content=ai_response.content, role=MessageRole.ASSISTANT, message_data=ai_response_metadata)
+    
+    try:
+        ai_response = await get_and_save_ai_response(conversation_id=str(new_conversation.id), user_content=user_message.content,service=langchain_service, db=db)
+    except HTTPException as e:
+        cleanup_conversation(db=db, conversation_id=new_conversation.id)
+        raise e
+    
     #Return the newly created conversation with the messages
     conversation = get_conversation_by_id(session=db, conversation_id=new_conversation.id)
     if not conversation:
@@ -66,16 +67,15 @@ async def continue_conversation(query: MessageCreate, conversation_id:UUID = Que
     Returns:
         ConversationPublic: The updated conversation object.
     """
-    if(check_conversation_exists(session=db, conversation_id=conversation_id) == False):
+    if check_conversation_exists(session=db, conversation_id=conversation_id) == False:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
     user_message = saveMessage(db=db, conversation_id=conversation_id, content=query.content, role="user", message_data=None)
-    ai_response = await langchain_service.conversation(str(conversation_id), user_message.content)
-    if not ai_response:
-        raise HTTPException(status_code=500, detail="Failed to get AI response")
-    logger.info(f"Received AI response: {ai_response}")
-    ai_response_metadata = serialise_message_data(ai_response)
-    ai_message = saveMessage(db=db, conversation_id=conversation_id, content=ai_response.content, role="assistant", message_data=ai_response_metadata)
+    try:
+        ai_response = await get_and_save_ai_response(conversation_id=str(conversation_id), user_content=user_message.content,service=langchain_service, db=db)
+    except HTTPException as e:
+        raise e
+    
     conversation = get_conversation_by_id(session=db, conversation_id=conversation_id)
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")

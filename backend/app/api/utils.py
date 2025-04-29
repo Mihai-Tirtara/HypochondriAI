@@ -4,6 +4,7 @@ from uuid import UUID
 from typing import Optional, Dict, Any
 from app.core.models import Conversation, Message, MessageCreate, ConversationCreate, MessageRole
 from app.db.crud import create_conversation,create_message
+from app.services.llm import LangchainService
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ def serialise_message_data(aiResponse:Any) -> Optional[Dict[str, Any]]:
     
     return message_data_dict
 
-def create_title(content:str):
+def create_title(content:str) -> str:
 
     """
     Create a title for the conversation based on the content.
@@ -100,3 +101,47 @@ def create_title(content:str):
     """
     title = content[:20] if len(content) > 20 else content
     return title
+def cleanup_conversation(db:Session, conversation_id: UUID) -> None:
+    """
+    Clean up the conversation by deleting it from the database.
+    
+    Args:
+        db (Session): The SQLModel session.
+        conversation (Conversation): The conversation object to be deleted.
+    """
+    try:
+        conversation = db.get(Conversation, conversation_id)
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        db.delete(conversation)
+        db.commit()
+        logger.info(f"Deleted conversation with ID: {conversation_id}")
+    except Exception as e:
+        logger.error(f"Error deleting conversation: {e}", exc_info=True)
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to delete conversation")
+    
+async def get_and_save_ai_response(conversation_id: UUID, user_content:str, service:LangchainService,db:Session) -> Message:
+    """
+    Get the AI response and save it to the database.
+    
+    Args:
+        conversation_id (UUID): The ID of the conversation.
+        user_content (str): The content of the user's message.
+        service (LangchainService): The Langchain service instance.
+        db (Session): The SQLModel session.
+
+    Returns:
+        Message: The saved AI response message object.
+    """
+    try:
+        ai_response = await service.conversation(str(conversation_id), user_content)
+        if not ai_response:
+            raise ValueError("Langchain service returned None or empty response")
+        logger.info(f"Received AI response: {ai_response}")
+        ai_response_metadata = serialise_message_data(ai_response)
+        ai_message = saveMessage(db=db, conversation_id=conversation_id, content=ai_response.content, role=MessageRole.ASSISTANT, message_data=ai_response_metadata)
+        return ai_message
+    except Exception as e:
+        logger.error(f"Langchain service error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error getting AI response: {str(e)}")    
