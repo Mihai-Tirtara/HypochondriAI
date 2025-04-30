@@ -109,10 +109,11 @@ def cleanup_conversation(db:Session, conversation_id: UUID) -> None:
         db (Session): The SQLModel session.
         conversation (Conversation): The conversation object to be deleted.
     """
+    conversation = db.get(Conversation, conversation_id)
+    if not conversation:
+        logger.error(f"Conversation with ID {conversation_id} not found")
+        raise HTTPException(status_code=404, detail="Conversation not found")
     try:
-        conversation = db.get(Conversation, conversation_id)
-        if not conversation:
-            raise HTTPException(status_code=404, detail="Conversation not found")
         db.delete(conversation)
         db.commit()
         logger.info(f"Deleted conversation with ID: {conversation_id}")
