@@ -1,4 +1,3 @@
-from sqlmodel import SQLModel, create_engine
 from app.core.models import User, UserCreate
 from app.config.config import settings
 

@@ -6,7 +6,6 @@ from sqlalchemy import func, Enum as SQLAlchemyEnum
 from sqlalchemy.dialects.postgresql import JSONB # Keep this for JSONB type
 
 from sqlmodel import Field, Relationship, SQLModel, Column
-from pydantic import BaseModel
 
 class UserBase(SQLModel):
     username: str = Field(index=True, unique=True)

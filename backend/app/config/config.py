@@ -1,7 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
 from pydantic_core import MultiHostUrl
-from typing_extensions import Self
 from pydantic import PostgresDsn, computed_field
 import os
 

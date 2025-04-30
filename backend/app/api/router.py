@@ -1,13 +1,24 @@
 
 from fastapi import APIRouter, HTTPException, Depends, Query
-from app.core.models import ConversationPublic, MessageCreate, ConversationCreate, Conversation, MessageRole
-from app.db.crud import create_conversation, create_message, get_conversation_by_id, get_conversations_by_user_id,check_conversation_exists, check_user_exists
+from app.core.models import ConversationPublic, MessageCreate, MessageRole
+from app.db.crud import (
+    get_conversation_by_id,
+    get_conversations_by_user_id,
+    check_conversation_exists,
+    check_user_exists,
+)
 from app.core.dependencies import get_langchain_service,get_session
 from app.services.llm import LangchainService
 import logging
 from sqlmodel import Session
 from uuid import UUID
-from app.api.utils import saveConversation,saveMessage, serialise_message_data,create_title,get_and_save_ai_response,cleanup_conversation
+from app.api.utils import (
+    saveConversation,
+    saveMessage,
+    create_title,
+    get_and_save_ai_response,
+    cleanup_conversation,
+)
 from typing import List
 
 
@@ -34,14 +45,19 @@ async def start_conversation(query: MessageCreate, user_id:UUID = Query(...), db
     Returns:
         ConversationPublic: The created conversation object.    
     """
-    if check_user_exists(session=db, user_id=user_id) == False:
+    if not check_user_exists(session=db, user_id=user_id):
         raise HTTPException(status_code=404, detail="User not found")
     
     new_conversation = saveConversation(db=db, user_id = user_id, title=create_title(query.content))
     user_message = saveMessage(db=db, conversation_id=new_conversation.id, content=query.content, role=MessageRole.USER, message_data=None)
     
     try:
-        ai_response = await get_and_save_ai_response(conversation_id=str(new_conversation.id), user_content=user_message.content,service=langchain_service, db=db)
+        await get_and_save_ai_response(
+            conversation_id=str(new_conversation.id),
+            user_content=user_message.content,
+            service=langchain_service,
+            db=db,
+        )
     except HTTPException as e:
         cleanup_conversation(db=db, conversation_id=new_conversation.id)
         raise e
@@ -67,12 +83,17 @@ async def continue_conversation(query: MessageCreate, conversation_id:UUID = Que
     Returns:
         ConversationPublic: The updated conversation object.
     """
-    if check_conversation_exists(session=db, conversation_id=conversation_id) == False:
+    if not check_conversation_exists(session=db, conversation_id=conversation_id):
         raise HTTPException(status_code=404, detail="Conversation not found")
     
     user_message = saveMessage(db=db, conversation_id=conversation_id, content=query.content, role="user", message_data=None)
     try:
-        ai_response = await get_and_save_ai_response(conversation_id=str(conversation_id), user_content=user_message.content,service=langchain_service, db=db)
+        await get_and_save_ai_response(
+            conversation_id=str(conversation_id),
+            user_content=user_message.content,
+            service=langchain_service,
+            db=db,
+        )
     except HTTPException as e:
         raise e
     
@@ -94,7 +115,7 @@ async def get_conversations(user_id: UUID = Query(...), db: Session = Depends(ge
     Returns:
         List[ConversationPublic]: A list of conversations for the user.
     """
-    if check_user_exists(session=db, user_id=user_id) == False:
+    if not check_user_exists(session=db, user_id=user_id):
         raise HTTPException(status_code=404, detail="User not found")
     
     conversations = get_conversations_by_user_id(session=db, user_id=user_id)

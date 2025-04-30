@@ -1,10 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
-from sqlmodel.pool import StaticPool
-from unittest.mock import MagicMock, AsyncMock # Use AsyncMock for async methods
-import os
-import uuid
+from unittest.mock import MagicMock, AsyncMock  # Use AsyncMock for async methods
 from typing import Optional
 from langchain_core.messages.ai import AIMessage
 
@@ -13,7 +10,7 @@ from app.main import app
 from app.core.dependencies import get_session, get_langchain_service
 from app.services.llm import LangchainService
 from app.config.config import settings
-from app.core.models import User, Conversation, Message,UserCreate
+from app.core.models import UserCreate
 from app.db.crud import create_user
 import logging
 
@@ -34,7 +31,6 @@ def session_fixture():
     
 @pytest.fixture(name="mock_langchain_service", scope="function")
 def mock_langchain_service_fixture():
-    original_initialized = LangchainService._initialized
     original_graph = LangchainService.graph
     original_model = LangchainService.model
     original_pool = LangchainService.db_pool

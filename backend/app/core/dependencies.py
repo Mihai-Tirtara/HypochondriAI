@@ -1,5 +1,5 @@
 import logging
-from fastapi import Depends, HTTPException
+from fastapi import HTTPException
 from app.services.llm import LangchainService # Import the service class
 from typing import Generator
 from sqlmodel import Session, create_engine

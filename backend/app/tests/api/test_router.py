@@ -1,11 +1,10 @@
 import uuid
 from fastapi.testclient import TestClient
-from sqlmodel import Session, select
-from unittest.mock import AsyncMock, MagicMock
+from sqlmodel import Session
+from unittest.mock import MagicMock
 
 # Import your models and schemas
-from app.core.models import User, Conversation, Message, MessageCreate, MessageRole
-from app.services.llm import LangchainService
+from app.core.models import User, Conversation, Message, MessageRole
 
 def test_start_conversation(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
     
@@ -230,7 +229,6 @@ def test_continue_conversation_invalid_conversation_id(client: TestClient, sessi
     Test the /v1/conversations endpoint with an invalid conversation_id parameter.
     """
     # Arrange
-    user_id = test_user.id  # Assuming you have a test user created in your fixtures
     invalid_conversation_id = str(uuid.uuid4())  # Generate a random UUID that doesn't exist in the database
     user_content = "Hello, I have an invalid conversation_ID"
     user_role = "user"

@@ -1,6 +1,5 @@
 from passlib.context import CryptContext
 
-from app.config.config import settings
 
 pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 

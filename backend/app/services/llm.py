@@ -4,10 +4,9 @@ from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph.message import add_messages
 from typing_extensions import Annotated, TypedDict
 from langchain.chat_models import init_chat_model
-from langgraph.graph import START, END, MessagesState, StateGraph
+from langgraph.graph import START, END, StateGraph
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from app.prompts.prompt_utils import generate_health_anxiety_prompt
-from langgraph.checkpoint.memory import MemorySaver 
 from psycopg_pool import AsyncConnectionPool
 import logging
 import boto3
@@ -38,7 +37,7 @@ class LangchainService:
             model_id: The model ID to use. If None, uses the default from settings.
             model_provider: The provider of the model. If None, uses the default from settings.
         """
-        logger.debug(f"LangchainSerivice created")
+        logger.debug("LangchainSerivice created")
         LangchainService.initialize_bedrock_client()
         
     @staticmethod
