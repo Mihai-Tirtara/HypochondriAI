@@ -1,9 +1,14 @@
-import pytest
 from unittest.mock import MagicMock, patch
 import uuid
-from sqlmodel import Session, select
-from app.core.models import User, UserCreate, Conversation, ConversationCreate, Message, MessageCreate
-from pydantic import ValidationError 
+from sqlmodel import Session
+from app.core.models import (
+    User,
+    UserCreate,
+    Conversation,
+    ConversationCreate,
+    Message,
+    MessageCreate,
+)
 from app.db.crud import (
     create_user,
     create_conversation,

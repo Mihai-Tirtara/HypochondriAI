@@ -3,8 +3,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 import uuid
 from fastapi import HTTPException
 from sqlmodel import Session
-from app.core.models import Conversation, Message, MessageCreate, ConversationCreate, MessageRole
-from app.db.crud import create_conversation, create_message
+from app.core.models import Conversation, Message, MessageRole
 from app.services.llm import LangchainService
 from app.api.utils import (
     saveConversation, 
@@ -64,7 +63,7 @@ class TestUtils:
         """Test saveConversation when create_conversation fails."""
         # Arrange
         title = "Test Conversation"
-        with patch('app.api.utils.create_conversation', return_value=None) as mock_create:
+        with patch("app.api.utils.create_conversation", return_value=None):
             # Act & Assert
             with pytest.raises(HTTPException) as exc_info:
                 saveConversation(db=self.mock_db, user_id=self.user_id, title=title)
@@ -116,8 +115,8 @@ class TestUtils:
         # Arrange
         content = "Test message"
         role = MessageRole.USER
-        
-        with patch('app.api.utils.create_message', return_value=None) as mock_create:
+
+        with patch("app.api.utils.create_message", return_value=None):
             # Act & Assert
             with pytest.raises(HTTPException) as exc_info:
                 saveMessage(
