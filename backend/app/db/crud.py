@@ -43,6 +43,7 @@ def check_conversation_exists(*, session: Session, conversation_id: uuid.UUID) -
     """Check if a conversation exists by its ID."""
     statement = select(Conversation).where(Conversation.id == conversation_id)
     return session.exec(statement).first() is not None
+
 def check_user_exists(*, session: Session, user_id: uuid.UUID) -> bool:
     """Check if a user exists by its ID."""
     statement = select(User).where(User.id == user_id)

@@ -95,7 +95,6 @@ def test_user_fixture(session: Session):
         email="test-email",
         password="hashedpassword",
     )
-    print("We are in the fixture " + str(test_user))
     user = create_user(session=session, user_create=test_user)
     # Create a new user in the database
     return user   
