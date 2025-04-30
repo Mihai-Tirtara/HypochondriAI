@@ -60,7 +60,7 @@ class Settings(BaseSettings):
         }
         # Join parameters into a query string
         query_string = "&".join(f"{k}={v}" for k, v in params.items())
-        return f"{base_url}?{query_string}"
+        return f"{query_string}"
     
     # Logging
     LOG_LEVEL: str = "INFO"
