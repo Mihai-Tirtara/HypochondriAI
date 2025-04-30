@@ -1,16 +1,19 @@
-from typing import Sequence, Optional,Any
-
-from langchain_core.messages import BaseMessage, HumanMessage
-from langgraph.graph.message import add_messages
-from typing_extensions import Annotated, TypedDict
-from langchain.chat_models import init_chat_model
-from langgraph.graph import START, END, StateGraph
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from app.prompts.prompt_utils import generate_health_anxiety_prompt
-from psycopg_pool import AsyncConnectionPool
 import logging
+from collections.abc import Sequence
+from typing import Annotated, Any, Optional
+
 import boto3
+from langchain.chat_models import init_chat_model
+from langchain_core.messages import BaseMessage, HumanMessage
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.message import add_messages
+from psycopg_pool import AsyncConnectionPool
+from typing_extensions import TypedDict
+
 from app.config.config import settings
+from app.prompts.prompt_utils import generate_health_anxiety_prompt
+
 logger = logging.getLogger(__name__)
 
 
@@ -50,7 +53,7 @@ class LangchainService:
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
             )
         except Exception as e:
-            logging.error(f"Error initializing Bedrock client: {str(e)}")
+            logging.error(f"Error initializing Bedrock client: {e!s}")
             raise    
         
     @staticmethod    
@@ -98,7 +101,7 @@ class LangchainService:
             await cls._initialize_checkpointer()
             cls._initialize_graph()
         except Exception as e:
-            logger.error(f"Error initializing Langchain components: {str(e)}")
+            logger.error(f"Error initializing Langchain components: {e!s}")
             raise
         
     @classmethod
@@ -123,7 +126,7 @@ class LangchainService:
             cls.model = init_chat_model(model=cls._model_id, model_provider=cls._model_provider)
             logger.info(f"Model initialized: {cls._model_id} with provider: {cls._model_provider}")
         except Exception as e:
-            logger.error(f"Error initializing model: {str(e)}")
+            logger.error(f"Error initializing model: {e!s}")
             raise
             
     @classmethod
@@ -149,7 +152,7 @@ class LangchainService:
                 await cls.db_pool.open()
                 logger.info("Database pool initialized.")
             except Exception as e:
-                logger.error(f"Error initializing database pool: {str(e)}")
+                logger.error(f"Error initializing database pool: {e!s}")
                 cls.db_pool = None
                 raise   
             
@@ -165,7 +168,7 @@ class LangchainService:
                 await cls.checkpointer.setup()
                 logger.info("Checkpointer initialized.")
             except Exception as e:
-                logger.error(f"Error initializing checkpointer: {str(e)}")
+                logger.error(f"Error initializing checkpointer: {e!s}")
                 cls.checkpointer = None
                 raise
             
@@ -180,7 +183,7 @@ class LangchainService:
                 cls.db_pool = None
                 logger.info("Database pool closed.")
             except Exception as e:
-                logger.error(f"Error closing database pool: {str(e)}")    
+                logger.error(f"Error closing database pool: {e!s}")    
         else:
             logger.info("No database pool to close.")
             

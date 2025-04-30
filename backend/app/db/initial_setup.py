@@ -1,12 +1,12 @@
-from app.core.models import User, UserCreate
-from app.config.config import settings
+import logging
 
-
-from app.core.dependencies import engine # Import engine directly
-from app.db.crud import create_user
 from sqlmodel import Session, select
 
-import logging
+from app.config.config import settings
+from app.core.dependencies import engine  # Import engine directly
+from app.core.models import User, UserCreate
+from app.db.crud import create_user
+
 logger = logging.getLogger(__name__)
 
 

@@ -1,11 +1,13 @@
 import uuid
-from enum import Enum
-from typing import List, Optional, Dict, Any # Use standard typing
 from datetime import datetime
-from sqlalchemy import func, Enum as SQLAlchemyEnum
-from sqlalchemy.dialects.postgresql import JSONB # Keep this for JSONB type
+from enum import Enum
+from typing import Any, Dict, List, Optional  # Use standard typing
 
-from sqlmodel import Field, Relationship, SQLModel, Column
+from sqlalchemy import Enum as SQLAlchemyEnum
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import JSONB  # Keep this for JSONB type
+from sqlmodel import Column, Field, Relationship, SQLModel
+
 
 class UserBase(SQLModel):
     username: str = Field(index=True, unique=True)

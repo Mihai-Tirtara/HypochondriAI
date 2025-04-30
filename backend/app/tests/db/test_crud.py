@@ -1,23 +1,26 @@
-from unittest.mock import MagicMock, patch
 import uuid
+from unittest.mock import MagicMock, patch
+
 from sqlmodel import Session
+
 from app.core.models import (
-    User,
-    UserCreate,
     Conversation,
     ConversationCreate,
     Message,
     MessageCreate,
+    User,
+    UserCreate,
 )
 from app.db.crud import (
-    create_user,
+    check_conversation_exists,
+    check_user_exists,
     create_conversation,
     create_message,
+    create_user,
     get_conversation_by_id,
     get_conversations_by_user_id,
-    check_conversation_exists,
-    check_user_exists
 )
+
 
 class TestCRUD:
     """

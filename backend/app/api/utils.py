@@ -1,11 +1,19 @@
 import logging
-from sqlmodel import Session
+from typing import Any, Dict, Optional
 from uuid import UUID
-from typing import Optional, Dict, Any
-from app.core.models import Conversation, Message, MessageCreate, ConversationCreate, MessageRole
-from app.db.crud import create_conversation,create_message
-from app.services.llm import LangchainService
+
 from fastapi import HTTPException
+from sqlmodel import Session
+
+from app.core.models import (
+    Conversation,
+    ConversationCreate,
+    Message,
+    MessageCreate,
+    MessageRole,
+)
+from app.db.crud import create_conversation, create_message
+from app.services.llm import LangchainService
 
 logger = logging.getLogger(__name__)
 
@@ -144,5 +152,5 @@ async def get_and_save_ai_response(conversation_id: UUID, user_content:str, serv
         ai_message = saveMessage(db=db, conversation_id=conversation_id, content=ai_response.content, role=MessageRole.ASSISTANT, message_data=ai_response_metadata)
         return ai_message
     except Exception as e:
-        logger.error(f"Langchain service error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting AI response: {str(e)}")    
+        logger.error(f"Langchain service error: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Error getting AI response: {e!s}")    

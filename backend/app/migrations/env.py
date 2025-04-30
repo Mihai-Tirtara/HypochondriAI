@@ -1,10 +1,9 @@
 from logging.config import fileConfig
 
-from sqlalchemy import create_engine
-
 from alembic import context
-
+from sqlalchemy import create_engine
 from sqlmodel import SQLModel
+
 from config.config import settings
 
 # this is the Alembic Config object, which provides

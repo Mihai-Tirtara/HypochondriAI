@@ -1,8 +1,9 @@
-from pydantic_settings import BaseSettings
-from typing import Optional
-from pydantic_core import MultiHostUrl
-from pydantic import PostgresDsn, computed_field
 import os
+from typing import Optional
+
+from pydantic import PostgresDsn, computed_field
+from pydantic_core import MultiHostUrl
+from pydantic_settings import BaseSettings
 
 APP_ENV = os.getenv("APP_ENV", "development") 
 env_file = ".env.test" if APP_ENV == "test" else ".env"

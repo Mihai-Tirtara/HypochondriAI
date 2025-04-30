@@ -1,27 +1,27 @@
 
-from fastapi import APIRouter, HTTPException, Depends, Query
-from app.core.models import ConversationPublic, MessageCreate, MessageRole
-from app.db.crud import (
-    get_conversation_by_id,
-    get_conversations_by_user_id,
-    check_conversation_exists,
-    check_user_exists,
-)
-from app.core.dependencies import get_langchain_service,get_session
-from app.services.llm import LangchainService
 import logging
-from sqlmodel import Session
+from typing import List
 from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlmodel import Session
+
 from app.api.utils import (
-    saveConversation,
-    saveMessage,
+    cleanup_conversation,
     create_title,
     get_and_save_ai_response,
-    cleanup_conversation,
+    saveConversation,
+    saveMessage,
 )
-from typing import List
-
-
+from app.core.dependencies import get_langchain_service, get_session
+from app.core.models import ConversationPublic, MessageCreate, MessageRole
+from app.db.crud import (
+    check_conversation_exists,
+    check_user_exists,
+    get_conversation_by_id,
+    get_conversations_by_user_id,
+)
+from app.services.llm import LangchainService
 
 router = APIRouter(
     prefix="/v1",

@@ -1,18 +1,21 @@
-import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
 import uuid
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 from sqlmodel import Session
+
+from app.api.utils import (
+    cleanup_conversation,
+    create_title,
+    get_and_save_ai_response,
+    saveConversation,
+    saveMessage,
+    serialise_message_data,
+)
 from app.core.models import Conversation, Message, MessageRole
 from app.services.llm import LangchainService
-from app.api.utils import (
-    saveConversation, 
-    saveMessage, 
-    serialise_message_data, 
-    create_title, 
-    cleanup_conversation, 
-    get_and_save_ai_response
-)
+
 
 class TestUtils:
     """Test utility functions."""

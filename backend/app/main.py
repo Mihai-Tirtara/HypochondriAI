@@ -1,9 +1,10 @@
+import logging
+
 from fastapi import FastAPI
+
 from app.api.router import router
 from app.config.config import settings
-import logging
 from app.services.llm import LangchainService
-
 
 logging.basicConfig(
     level=settings.LOG_LEVEL.upper(), # Use level from your config

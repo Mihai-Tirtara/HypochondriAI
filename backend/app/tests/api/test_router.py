@@ -1,10 +1,12 @@
 import uuid
-from fastapi.testclient import TestClient
-from sqlmodel import Session
 from unittest.mock import MagicMock
 
+from fastapi.testclient import TestClient
+from sqlmodel import Session
+
 # Import your models and schemas
-from app.core.models import User, Conversation, Message, MessageRole
+from app.core.models import Conversation, Message, MessageRole, User
+
 
 def test_start_conversation(client: TestClient, session: Session, mock_langchain_service: MagicMock, test_user: User):
     

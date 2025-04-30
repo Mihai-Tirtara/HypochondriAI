@@ -1,18 +1,19 @@
 import uuid
 from typing import List
 
-from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
+from sqlmodel import Session, select
 
-from app.core.security import get_password_hash
 from app.core.models import (
-    User,
-    UserCreate,
     Conversation,
     ConversationCreate,
     Message,
     MessageCreate,
+    User,
+    UserCreate,
 )
+from app.core.security import get_password_hash
+
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     user_db = User.model_validate(user_create, update={"password_hash": get_password_hash(user_create.password)} )

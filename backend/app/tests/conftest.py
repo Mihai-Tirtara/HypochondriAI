@@ -1,18 +1,18 @@
+import logging
+from typing import Optional
+from unittest.mock import AsyncMock, MagicMock  # Use AsyncMock for async methods
+
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
-from unittest.mock import MagicMock, AsyncMock  # Use AsyncMock for async methods
-from typing import Optional
 from langchain_core.messages.ai import AIMessage
+from sqlmodel import Session, SQLModel, create_engine
 
-
-from app.main import app
-from app.core.dependencies import get_session, get_langchain_service
-from app.services.llm import LangchainService
 from app.config.config import settings
+from app.core.dependencies import get_langchain_service, get_session
 from app.core.models import UserCreate
 from app.db.crud import create_user
-import logging
+from app.main import app
+from app.services.llm import LangchainService
 
 logger = logging.getLogger(__name__)
 
