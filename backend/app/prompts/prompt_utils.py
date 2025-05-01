@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from app.prompts.health_anxiety_prompt_template import HEALTH_ANXIETY_BASE_PROMPT
 
 
-def generate_health_anxiety_prompt(user_context: Optional[str] = None) :
+def generate_health_anxiety_prompt(user_context: Optional[str] = None):
     """
     Generate a health anxiety prompt for a given set of symptoms and user context.
 
@@ -18,13 +18,15 @@ def generate_health_anxiety_prompt(user_context: Optional[str] = None) :
     """
     prompt_template = ChatPromptTemplate.from_messages(
         [
-            ("system", 
-            f"""
+            (
+                "system",
+                f"""
             {HEALTH_ANXIETY_BASE_PROMPT} 
     - User Context: {user_context or "No additional context provided."}
-    """ ),
-        MessagesPlaceholder(variable_name="messages"),
+    """,
+            ),
+            MessagesPlaceholder(variable_name="messages"),
         ]
     )
-    
+
     return prompt_template

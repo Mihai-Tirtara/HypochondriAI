@@ -18,7 +18,7 @@ from app.services.llm import LangchainService
 logger = logging.getLogger(__name__)
 
 
-def saveConversation(db:Session, user_id:UUID, title:Optional[str]) -> Conversation : 
+def save_conversation(db: Session, user_id: UUID, title: Optional[str]) -> Conversation:
     """
     Create the conversation object and save it to the database
     
@@ -39,7 +39,13 @@ def saveConversation(db:Session, user_id:UUID, title:Optional[str]) -> Conversat
     
     return db_conversation
 
-def saveMessage(db:Session, conversation_id:UUID, content:str, role:MessageRole, message_data:Optional[Dict[str, Any]] = None) -> Message:
+def save_message(
+    db: Session,
+    conversation_id: UUID,
+    content: str,
+    role: MessageRole,
+    message_data: Optional[Dict[str, Any]] = None,
+) -> Message:
     """
     Create the message object and save it to the database
     
@@ -70,49 +76,57 @@ def saveMessage(db:Session, conversation_id:UUID, content:str, role:MessageRole,
     
     return db_message
 
-def serialise_message_data(aiResponse:Any) -> Optional[Dict[str, Any]]:
+def serialise_message_data(ai_response: Any) -> Optional[Dict[str, Any]]:
     """
-    Serializes the AI response message data into a dictionary format.
-    
-    Args:
-        aiResponse (Any): The AI response object.
+            Serializes the AI response message data into a dictionary format.
 
-    Returns:
-        Optional[Dict[str, Any]]: The serialized message data as a dictionary.
+            Args:
+            aiResponse (Any): The AI response object.
+
+            Returns:
+    Optional[Dict[str, Any]]: The serialized message data as a dictionary.
     """
-    
+
     message_data_dict = None
     try:
-        if hasattr(aiResponse, 'model_dump'):
-            message_data_dict = aiResponse.model_dump()
-        elif hasattr(aiResponse, 'dict'):
-            message_data_dict = aiResponse.dict()
+        if hasattr(ai_response, "model_dump"):
+            message_data_dict = ai_response.model_dump()
+        elif hasattr(ai_response, "dict"):
+            message_data_dict = ai_response.dict()
         else:
-            message_data_dict = {"error": "Serialization failed", "content": aiResponse.content}
+            message_data_dict = {
+                "error": "Serialization failed",
+                "content": ai_response.content,
+            }
     except Exception as e:
         logger.error(f"Error serializing AI message object: {e}", exc_info=True)
-        message_data_dict = {"error": f"Serialization failed: {e}", "content": aiResponse.content}
-    
+        message_data_dict = {
+            "error": f"Serialization failed: {e}",
+            "content": ai_response.content,
+        }
+
     return message_data_dict
 
-def create_title(content:str) -> str:
 
+def create_title(content: str) -> str:
     """
     Create a title for the conversation based on the content.
     At the moment just save the title of the conversation as the first 20 characters of the query content
     In the future, we can use the query content to generate a more meaningful title
     Args:
-        content (str): The content of the message.
+    content (str): The content of the message.
 
     Returns:
-        str: The generated title.
+    str: The generated title.
     """
-    title = content[:20] if len(content) > 20 else content
+    title = content[:20] if len(content) > 20 else content  # noqa: PLR2004
     return title
-def cleanup_conversation(db:Session, conversation_id: UUID) -> None:
+
+
+def cleanup_conversation(db: Session, conversation_id: UUID) -> None:
     """
     Clean up the conversation by deleting it from the database.
-    
+
     Args:
         db (Session): The SQLModel session.
         conversation (Conversation): The conversation object to be deleted.
@@ -129,11 +143,14 @@ def cleanup_conversation(db:Session, conversation_id: UUID) -> None:
         logger.error(f"Error deleting conversation: {e}", exc_info=True)
         db.rollback()
         raise HTTPException(status_code=500, detail="Failed to delete conversation")
-    
-async def get_and_save_ai_response(conversation_id: UUID, user_content:str, service:LangchainService,db:Session) -> Message:
+
+
+async def get_and_save_ai_response(
+    conversation_id: UUID, user_content: str, service: LangchainService, db: Session
+) -> Message:
     """
     Get the AI response and save it to the database.
-    
+
     Args:
         conversation_id (UUID): The ID of the conversation.
         user_content (str): The content of the user's message.
@@ -149,8 +166,14 @@ async def get_and_save_ai_response(conversation_id: UUID, user_content:str, serv
             raise ValueError("Langchain service returned None or empty response")
         logger.info(f"Received AI response: {ai_response}")
         ai_response_metadata = serialise_message_data(ai_response)
-        ai_message = saveMessage(db=db, conversation_id=conversation_id, content=ai_response.content, role=MessageRole.ASSISTANT, message_data=ai_response_metadata)
+        ai_message = save_message(
+            db=db,
+            conversation_id=conversation_id,
+            content=ai_response.content,
+            role=MessageRole.ASSISTANT,
+            message_data=ai_response_metadata,
+        )
         return ai_message
     except Exception as e:
         logger.error(f"Langchain service error: {e!s}")
-        raise HTTPException(status_code=500, detail=f"Error getting AI response: {e!s}")    
+        raise HTTPException(status_code=500, detail=f"Error getting AI response: {e!s}")

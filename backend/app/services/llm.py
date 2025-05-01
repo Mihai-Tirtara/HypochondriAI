@@ -19,22 +19,25 @@ logger = logging.getLogger(__name__)
 
 class State(TypedDict):
     """State for Langchain service"""
+
     messages: Annotated[Sequence[BaseMessage], add_messages]
     user_context: Optional[str]
 
 
 class LangchainService:
-    graph: Optional[Any] = None # Use Any or more specific type if available
-    checkpointer = None # Union type for checkpointer
-    model: Optional[Any] = None # Use Any or more specific ChatModel type
-    db_pool: Optional[AsyncConnectionPool] = None # Store the pool instance
+    graph: Optional[Any] = None  # Use Any or more specific type if available
+    checkpointer = None  # Union type for checkpointer
+    model: Optional[Any] = None  # Use Any or more specific ChatModel type
+    db_pool: Optional[AsyncConnectionPool] = None  # Store the pool instance
     _model_id: Optional[str] = None
     _model_provider: Optional[str] = None
     _initialized: bool = False
-    
-    def __init__(self, model_id: Optional[str] = None, model_provider: Optional[str] = None):
+
+    def __init__(
+        self, model_id: Optional[str] = None, model_provider: Optional[str] = None
+    ):
         """
-        Initialize Langchain service with optional model and provider 
+        Initialize Langchain service with optional model and provider
 
         Args:
             model_id: The model ID to use. If None, uses the default from settings.
@@ -42,24 +45,22 @@ class LangchainService:
         """
         logger.debug("LangchainSerivice created")
         LangchainService.initialize_bedrock_client()
-        
+
     @staticmethod
     def initialize_bedrock_client():
         """Create and return an Amazon Bedrock client"""
         try:
-            boto3.setup_default_session(   
-            region_name=settings.AWS_REGION,
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+            boto3.setup_default_session(
+                region_name=settings.AWS_REGION,
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
             )
         except Exception as e:
             logging.error(f"Error initializing Bedrock client: {e!s}")
-            raise    
-        
-    @staticmethod    
-    def call_model(state:State):
-        
-            
+            raise
+
+    @staticmethod
+    def call_model(state: State):
         """
         Call the model with the given state.
 
@@ -68,26 +69,28 @@ class LangchainService:
 
         Returns:
             The response from the model.
-            
+
         """
-        
+
         # Get the components from the state
         messages = state["messages"]
         user_context = state.get("user_context", None)
         prompt_template = generate_health_anxiety_prompt(user_context)
         # Invoke the prompt template with the state to get a formatted prompt
         formatted_prompt = prompt_template.invoke({"messages": messages})
-    
+
         # Now pass the formatted prompt to the model
         response = LangchainService.model.invoke(formatted_prompt)
         logger.info(f"Model response: {response}")
         return {"messages": [response]}
-    
+
     @classmethod
-    async def initialize_langchain_components(cls, model_id: Optional[str] = None, model_provider: Optional[str] = None):
+    async def initialize_langchain_components(
+        cls, model_id: Optional[str] = None, model_provider: Optional[str] = None
+    ):
         """
         Set up all the necessary componnents  for the Langchain service.
-        
+
         Args:
             model_id: The model ID to use. If None, uses the default from settings.
             model_provider: The provider of the model. If None, uses the default from settings.
@@ -103,9 +106,11 @@ class LangchainService:
         except Exception as e:
             logger.error(f"Error initializing Langchain components: {e!s}")
             raise
-        
+
     @classmethod
-    def _initialize_model(cls, model_id: Optional[str] = None, model_provider: Optional[str] = None):
+    def _initialize_model(
+        cls, model_id: Optional[str] = None, model_provider: Optional[str] = None
+    ):
         """
         Initialize the model with the given ID and provider.
 
@@ -118,21 +123,25 @@ class LangchainService:
         """
         # Initialize the model
         cls._model_id = model_id or settings.MODEL_ID
-        cls._model_provider = model_provider or settings.MODEL_PROVIDER 
+        cls._model_provider = model_provider or settings.MODEL_PROVIDER
         try:
             # Initialize the Bedrock client one extra time for safety
             # This is a bit redundant but ensures the client is set up before model initialization
             cls.initialize_bedrock_client()
-            cls.model = init_chat_model(model=cls._model_id, model_provider=cls._model_provider)
-            logger.info(f"Model initialized: {cls._model_id} with provider: {cls._model_provider}")
+            cls.model = init_chat_model(
+                model=cls._model_id, model_provider=cls._model_provider
+            )
+            logger.info(
+                f"Model initialized: {cls._model_id} with provider: {cls._model_provider}"
+            )
         except Exception as e:
             logger.error(f"Error initializing model: {e!s}")
             raise
-            
+
     @classmethod
     async def _initialize_pool(cls):
         """
-        Initialize the database pool 
+        Initialize the database pool
         """
         if cls.db_pool is None:
             logger.info("Initializing database pool...")
@@ -148,15 +157,21 @@ class LangchainService:
                     f"host={settings.DB_HOST} "
                     f"port={settings.DB_PORT}"
                 )
-                cls.db_pool = AsyncConnectionPool(conninfo=conninfo_str, max_size=20, max_idle=60, open=False, kwargs=connection_kwargs)
+                cls.db_pool = AsyncConnectionPool(
+                    conninfo=conninfo_str,
+                    max_size=20,
+                    max_idle=60,
+                    open=False,
+                    kwargs=connection_kwargs,
+                )
                 await cls.db_pool.open()
                 logger.info("Database pool initialized.")
             except Exception as e:
                 logger.error(f"Error initializing database pool: {e!s}")
                 cls.db_pool = None
-                raise   
-            
-    @classmethod 
+                raise
+
+    @classmethod
     async def _initialize_checkpointer(cls):
         """
         Initialize the checkpointer for the graph.
@@ -171,8 +186,8 @@ class LangchainService:
                 logger.error(f"Error initializing checkpointer: {e!s}")
                 cls.checkpointer = None
                 raise
-            
-    @classmethod    
+
+    @classmethod
     async def close_pool(cls):
         """
         Close the pool and any resources it holds.
@@ -183,10 +198,10 @@ class LangchainService:
                 cls.db_pool = None
                 logger.info("Database pool closed.")
             except Exception as e:
-                logger.error(f"Error closing database pool: {e!s}")    
+                logger.error(f"Error closing database pool: {e!s}")
         else:
             logger.info("No database pool to close.")
-            
+
     @classmethod
     def _initialize_graph(cls):
         """
@@ -202,9 +217,11 @@ class LangchainService:
             cls._initialized = True
             logger.info("Graph initialized.")
         else:
-            logger.info("Graph already initialized.")        
+            logger.info("Graph already initialized.")
 
-    async def conversation(self, conversation_id:str ,user_input: str, user_context: Optional[str] = None) :
+    async def conversation(
+        self, conversation_id: str, user_input: str, user_context: Optional[str] = None
+    ):
         """
         Create a conversation with the chat model or continue an existing one.
         Args:
@@ -213,21 +230,21 @@ class LangchainService:
             user_context: Additional context provided by the user.
 
         Returns:
-            The response from the AI model 
+            The response from the AI model
         """
         if not self.__class__._initialized or self.__class__.graph is None:
             raise Exception("Graph not initialized. Call initialize_graph() first.")
-        
+
         # Check if checkpointer exists and maybe log its type for debugging
         if self.__class__.checkpointer:
             logger.debug(f"Using checkpointer: {type(self.__class__.checkpointer)}")
         else:
             logger.error("Checkpointer is None during conversation call.")
-            raise Exception("Checkpointer not available.")    
-            
+            raise Exception("Checkpointer not available.")
+
         config = {"configurable": {"thread_id": conversation_id}}
         input_messages = [HumanMessage(content=user_input)]
-        response = await self.__class__.graph.ainvoke({"messages":input_messages, "user_context": user_context}, config=config)
-        return response["messages"][-1]  
-    
-    
+        response = await self.__class__.graph.ainvoke(
+            {"messages": input_messages, "user_context": user_context}, config=config
+        )
+        return response["messages"][-1]

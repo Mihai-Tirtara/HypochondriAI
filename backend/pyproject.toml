@@ -55,8 +55,7 @@ known-first-party = ["app"]  # Replace with your FastAPI app package name
 # Mccabe complexity checker settings
 [tool.ruff.mccabe]
 max-complexity = 10  # Set your desired complexity threshold
-
-[tool.ruff.format]
-quote-style = "double" 
-indent-style = "tab" 
-line-ending = "auto" 
+# Add Black configuration
+[tool.black]
+line-length = 88
+target-version = ['py39']

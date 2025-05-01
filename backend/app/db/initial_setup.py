@@ -17,11 +17,17 @@ def init_db():
     """
     with Session(engine) as session:
         # Check if the superuser already exists
-        superuser = session.exec(select(User).where(User.email == settings.DB_SUPERUSER_EMAIL)).first()   
+        superuser = session.exec(
+            select(User).where(User.email == settings.DB_SUPERUSER_EMAIL)
+        ).first()
         if not superuser:
             logger.info("Intial user not found, creating...")
-            intial_user =  UserCreate(username=settings.DB_SUPERUSER_USERNAME, password=settings.DB_SUPERUSER_PASSWORD, email=settings.DB_SUPERUSER_EMAIL)
+            intial_user = UserCreate(
+                username=settings.DB_SUPERUSER_USERNAME,
+                password=settings.DB_SUPERUSER_PASSWORD,
+                email=settings.DB_SUPERUSER_EMAIL,
+            )
             superuser = create_user(session=session, user_create=intial_user)
             logger.info("Intial user created")
         else:
-            logger.info("Intial user already exists") 
+            logger.info("Intial user already exists")
