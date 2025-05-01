@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional  # Use standard typing
+from typing import Any, Optional  # Use standard typing
 
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy import func
@@ -34,7 +34,7 @@ class User(UserBase, table=True):
         },  # Keep server_default via sa_column_kwargs
     )
 
-    conversations: List["Conversation"] = Relationship(back_populates="user")
+    conversations: list["Conversation"] = Relationship(back_populates="user")
 
 
 class MessageRole(str, Enum):
@@ -56,7 +56,7 @@ class MessageBase(SQLModel):
 
 
 class MessageCreate(MessageBase):
-    message_data: Optional[Dict[str, Any]] = None
+    message_data: Optional[dict[str, Any]] = None
 
 
 class MessagePublic(MessageBase):
@@ -69,7 +69,7 @@ class Message(MessageBase, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     conversation_id: uuid.UUID = Field(foreign_key="conversations.id", index=True)
-    message_data: Optional[Dict[str, Any]] = Field(
+    message_data: Optional[dict[str, Any]] = Field(
         default=None, sa_column=Column(JSONB, nullable=True)
     )
     created_at: datetime = Field(
@@ -94,7 +94,7 @@ class ConversationPublic(ConversationBase):
     id: uuid.UUID
     created_at: datetime
     user_id: uuid.UUID
-    messages: List[MessagePublic] = []  # Include messages in the public representation
+    messages: list[MessagePublic] = []  # Include messages in the public representation
 
 
 class Conversation(ConversationBase, table=True):
@@ -109,7 +109,7 @@ class Conversation(ConversationBase, table=True):
         },  # Keep server_default via sa_column_kwargs
     )
     user: User = Relationship(back_populates="conversations")
-    messages: List[Message] = Relationship(
+    messages: list[Message] = Relationship(
         back_populates="conversation",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )  # Cascade delete for messages

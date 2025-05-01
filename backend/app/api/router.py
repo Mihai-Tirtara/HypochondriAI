@@ -1,5 +1,4 @@
 import logging
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -24,7 +23,6 @@ from app.services.llm import LangchainService
 
 router = APIRouter(prefix="/v1", tags=["llm"])
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,36 +33,17 @@ async def start_conversation(
     db: Session = Depends(get_session),
     langchain_service: LangchainService = Depends(get_langchain_service),
 ):
-    """
-
-
-    Start a new conversation with the AI.
-
-
+    """Start a new conversation with the AI.
 
     Args:
-
-
         query (MessageCreate): The message to send to the AI.
-
-
         user_id (UUID): The ID of the user.
-
-
         db (Session): The SQLModel session.
-
-
         langchain_service (LangchainService): The Langchain service instance.
 
-
     Returns:
-
-
         ConversationPublic: The created conversation object.
-
-
     """
-
     if not check_user_exists(session=db, user_id=user_id):
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -87,13 +66,11 @@ async def start_conversation(
             service=langchain_service,
             db=db,
         )
-
     except HTTPException as e:
         cleanup_conversation(db=db, conversation_id=new_conversation.id)
         raise e
 
     # Return the newly created conversation with the messages
-
     conversation = get_conversation_by_id(
         session=db, conversation_id=new_conversation.id
     )
@@ -112,37 +89,17 @@ async def continue_conversation(
     db: Session = Depends(get_session),
     langchain_service: LangchainService = Depends(get_langchain_service),
 ):
-    """
-
-
-    Continue an existing conversation by conversation ID.
-
-
+    """Continue an existing conversation by conversation ID.
 
     Args:
-
-
         query (MessageCreate): The message to send to the AI.
-
-
         conversation_id (UUID): The ID of the conversation.
-
-
         db (Session): The SQLModel session.
-
-
         langchain_service (LangchainService): The Langchain service instance.
 
-
-
     Returns:
-
-
         ConversationPublic: The updated conversation object.
-
-
     """
-
     if not check_conversation_exists(session=db, conversation_id=conversation_id):
         raise HTTPException(status_code=404, detail="Conversation not found")
 
@@ -161,7 +118,6 @@ async def continue_conversation(
             service=langchain_service,
             db=db,
         )
-
     except HTTPException as e:
         raise e
 
@@ -174,35 +130,19 @@ async def continue_conversation(
     return conversation
 
 
-@router.get("/conversations", response_model=List[ConversationPublic])
+@router.get("/conversations", response_model=list[ConversationPublic])
 async def get_conversations(
     user_id: UUID = Query(...), db: Session = Depends(get_session)
 ):
-    """
-
-
-    Get all conversations for a user by user ID.
-
-
+    """Get all conversations for a user by user ID.
 
     Args:
-
-
         user_id (UUID): The ID of the user.
-
-
         db (Session): The SQLModel session.
 
-
-
     Returns:
-
-
         List[ConversationPublic]: A list of conversations for the user.
-
-
     """
-
     if not check_user_exists(session=db, user_id=user_id):
         raise HTTPException(status_code=404, detail="User not found")
 

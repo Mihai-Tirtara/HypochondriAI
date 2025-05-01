@@ -1,6 +1,6 @@
 import uuid
-from typing import List
 
+# Removed unused import of List from typing
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
@@ -63,7 +63,7 @@ def get_conversation_by_id(
 
 def get_conversations_by_user_id(
     *, session: Session, user_id: uuid.UUID
-) -> List[Conversation]:
+) -> list[Conversation]:
     """Get all conversations for a user by user ID."""
     statement = select(Conversation).where(Conversation.user_id == user_id)
     conversations = session.exec(statement).all()

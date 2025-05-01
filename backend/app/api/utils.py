@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -44,7 +44,7 @@ def save_message(
     conversation_id: UUID,
     content: str,
     role: MessageRole,
-    message_data: Optional[Dict[str, Any]] = None,
+    message_data: Optional[dict[str, Any]] = None,
 ) -> Message:
     """
     Create the message object and save it to the database
@@ -76,7 +76,7 @@ def save_message(
     
     return db_message
 
-def serialise_message_data(ai_response: Any) -> Optional[Dict[str, Any]]:
+def serialise_message_data(ai_response: Any) -> Optional[dict[str, Any]]:
     """
             Serializes the AI response message data into a dictionary format.
 
