@@ -1,14 +1,12 @@
 # HyphochondriaAI
 
-A comprehensive application for providing AI-powered insights and support for health anxiety concerns.
+A comprehensive chatbot for providing AI-powered insights and support for people struggling with health anxiety.
 
 ## 🚨 Important Notice - Work in Progress 🚨
 
 **The application is currently undergoing a major architectural change.**
 
 - The frontend is temporarily not functioning due to backend API changes
-- We're transitioning from Spring Boot to a Python FastAPI backend with LangChain implementation
-- Follow the development setup instructions below to work with the current state
 
 ## Project Architecture
 
@@ -75,32 +73,29 @@ npm start
 - ✅ Implemented LangChain conversation handling
 - ✅ Added PostgreSQL database integration with SQLModel and Alembic
 - ✅ Created comprehensive API endpoints for conversation management
+- ✅ Testing framework and CI pipeline implemented
 - ❌ Frontend not currently compatible with new backend architecture
-- ❌ Testing framework not yet implemented
 
 ## Next Steps
 
-Our development roadmap in order of priority:
+The  development roadmap in order of priority:
 
-1. **Backend Enhancements**:
-   - Implement proper testing framework
-   - Add code formatting and linting
-   - Complete database migration scripts
-
-2. **Frontend Updates**:
+1. **Frontend Updates**:
    - Update frontend to work with new API endpoints
    - Implement UI improvements for conversation flow
    - Add proper error handling
+   - Add proper E2E testing 
 
-3. **Future Enhancements**:
-   - User authentication and session management
+2. **Future Enhancements**:
    - Docker containerization
-   - CI/CD pipeline setup
+   - User authentication and session management
+   - Kubernetes setup
+   - CD pipeline setup
    - AWS API Gateway integration
+   - Implement RAG for up-to date information
    - Additional features:
      * Personalized recommendations
      * Journal and symptom tracking
-     * Professional resources directory
 
 ## Troubleshooting
 
@@ -114,10 +109,6 @@ Our development roadmap in order of priority:
 2. **Frontend API Connection** (when updated)
    * Verify backend is running on the expected port
    * Check for CORS issues in browser console
-
-## Contributing
-
-Contributions are welcome! Please read our contributing guidelines before submitting pull requests.
 
 ## License
 

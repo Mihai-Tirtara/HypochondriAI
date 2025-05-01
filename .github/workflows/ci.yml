@@ -1,0 +1,70 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            python-version: ["3.9"]
+
+    # Define services container (e.g., PostgreSQL database)
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        working-directory: ./backend/app
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          [ -f requirements-dev.txt ] && pip install -r requirements-dev.txt || echo "requirements-dev.txt not found, skipping."
+
+
+      - name: Check formatting with Black
+        working-directory: ./backend/app
+        run: |
+          black . --check
+
+      - name: Lint with Ruff
+        working-directory: ./backend/app
+        run: |
+          ruff check .
+
+      - name: Test with Pytest
+        working-directory: ./backend/app
+        env:
+          # Environment variables for Pytest and SQLModel/SQLAlchemy engine
+          APP_ENV: test
+          DB_HOST: localhost # Service containers accessible via localhost
+          DB_PORT: ${{ job.services.postgres.ports['5432'] }} # Get the mapped port
+          DB_USERNAME: testuser     # Match the service container's POSTGRES_USER
+          DB_PASSWORD: testpassword # Match the service container's POSTGRES_PASSWORD
+          DB_NAME: testdb           # Match the service container's POSTGRES_DB
+        run: |
+          pytest

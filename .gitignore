@@ -4,6 +4,7 @@ __pycache__/
 
 # Environment directories
 .env
+.env.test
 .venv/
 venv/
 env/
