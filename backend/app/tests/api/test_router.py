@@ -41,78 +41,80 @@ def test_start_conversation(
     response = client.post("/v1/new", json=request_data, params={"user_id": user_id})
 
     # Assert
-    assert response.status_code == status.HTTP_200_OK, (
-        f"Expected status code status.HTTP_200_OK, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_200_OK
+    ), f"Expected status code status.HTTP_200_OK, got {response.status_code}"
     response_data = response.json()
 
     # Assert the response structure
     assert "id" in response_data
-    assert response_data["user_id"] == str(user_id), (
-        f"Expected user_id {user_id}, got {response_data['user_id']}"
-    )
-    assert response_data["title"] == request_data["content"][:20], (
-        f"Expected title {request_data['content'][:20]}, got {response_data['title']}"
-    )
+    assert response_data["user_id"] == str(
+        user_id
+    ), f"Expected user_id {user_id}, got {response_data['user_id']}"
+    assert (
+        response_data["title"] == request_data["content"][:20]
+    ), f"Expected title {request_data['content'][:20]}, got {response_data['title']}"
     assert "messages" in response_data, "Expected messages in response"
-    assert len(response_data["messages"]) == 2, (  # noqa: PLR2004
-        f"Expected 2 messages, got {len(response_data['messages'])}"
-    )
+    assert (
+        len(response_data["messages"]) == 2
+    ), f"Expected 2 messages, got {len(response_data['messages'])}"  # noqa: PLR2004
 
     # Check user message details
     assert response_data["messages"][0]["role"] == "user", "Expected user message role"
-    assert response_data["messages"][0]["content"] == request_data["content"], (
-        f"Expected user message content {request_data['content']}, got {response_data['messages'][0]['content']}"
-    )
+    assert (
+        response_data["messages"][0]["content"] == request_data["content"]
+    ), f"Expected user message content {request_data['content']}, got {response_data['messages'][0]['content']}"
 
     # Check AI message details
-    assert response_data["messages"][1]["role"] == "assistant", (
-        "Expected assistant message role"
-    )
-    assert response_data["messages"][1]["content"] == expected_ai_response["content"], (
-        f"Expected assistant message content {expected_ai_response['content']}, got {response_data['messages'][1]['content']}"
-    )
+    assert (
+        response_data["messages"][1]["role"] == "assistant"
+    ), "Expected assistant message role"
+    assert (
+        response_data["messages"][1]["content"] == expected_ai_response["content"]
+    ), f"Expected assistant message content {expected_ai_response['content']}, got {response_data['messages'][1]['content']}"
 
     mock_langchain_service.conversation.assert_awaited_once()
     call_args = mock_langchain_service.conversation.call_args
-    assert call_args[0][0] == str(response_data["id"]), (
-        f"Expected conversation ID {response_data['id']}, got {call_args[0][0]}"
-    )
-    assert call_args[0][1] == request_data["content"], (
-        f"Expected user input {request_data['content']}, got {call_args[0][1]}"
-    )
-    assert "user_context" not in call_args.kwargs, (
-        f"Expected the keyword argument 'user_context' to be not present if passed with None, got {call_args.kwargs}"
-    )
+    assert call_args[0][0] == str(
+        response_data["id"]
+    ), f"Expected conversation ID {response_data['id']}, got {call_args[0][0]}"
+    assert (
+        call_args[0][1] == request_data["content"]
+    ), f"Expected user input {request_data['content']}, got {call_args[0][1]}"
+    assert (
+        "user_context" not in call_args.kwargs
+    ), f"Expected the keyword argument 'user_context' to be not present if passed with None, got {call_args.kwargs}"
 
     db_conversation = session.get(Conversation, response_data["id"])
-    assert db_conversation is not None, (
-        "Expected conversation to be saved in the database"
-    )
-    assert db_conversation.user_id == user_id, (
-        f"Expected conversation user ID {user_id}, got {db_conversation.user_id}"
-    )
-    assert db_conversation.title == request_data["content"][:20], (
-        f"Expected conversation title {request_data['content'][:20]}, got {db_conversation.title}"
-    )
-    assert len(db_conversation.messages) == 2, (  # noqa: PLR2004
+    assert (
+        db_conversation is not None
+    ), "Expected conversation to be saved in the database"
+    assert (
+        db_conversation.user_id == user_id
+    ), f"Expected conversation user ID {user_id}, got {db_conversation.user_id}"
+    assert (
+        db_conversation.title == request_data["content"][:20]
+    ), f"Expected conversation title {request_data['content'][:20]}, got {db_conversation.title}"
+    assert (
+        len(db_conversation.messages) == 2
+    ), (  # noqa: PLR2004
         f"Expected 2 messages in conversation, got {len(db_conversation.messages)}"
     )
-    assert db_conversation.messages[0].role == "user", (
-        "Expected user message role in conversation"
-    )
-    assert db_conversation.messages[0].content == request_data["content"], (
-        f"Expected user message content {request_data['content']}, got {db_conversation.messages[0].content}"
-    )
-    assert db_conversation.messages[1].role == "assistant", (
-        "Expected assistant message role in conversation"
-    )
-    assert db_conversation.messages[1].content == expected_ai_response["content"], (
-        f"Expected assistant message content {expected_ai_response['content']}, got {db_conversation.messages[1].content}"
-    )
-    assert db_conversation.messages[1].message_data == message_data, (
-        f"Expected assistant message data {message_data}, got {db_conversation.messages[1].message_data}"
-    )
+    assert (
+        db_conversation.messages[0].role == "user"
+    ), "Expected user message role in conversation"
+    assert (
+        db_conversation.messages[0].content == request_data["content"]
+    ), f"Expected user message content {request_data['content']}, got {db_conversation.messages[0].content}"
+    assert (
+        db_conversation.messages[1].role == "assistant"
+    ), "Expected assistant message role in conversation"
+    assert (
+        db_conversation.messages[1].content == expected_ai_response["content"]
+    ), f"Expected assistant message content {expected_ai_response['content']}, got {db_conversation.messages[1].content}"
+    assert (
+        db_conversation.messages[1].message_data == message_data
+    ), f"Expected assistant message data {message_data}, got {db_conversation.messages[1].message_data}"
     print("Test passed: Response contains the expected conversation")
 
 
@@ -131,9 +133,9 @@ def test_start_conversation_missing_user_id(
     response = client.post("/v1/new", json=request_data)
 
     # Assert
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
-        f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    ), f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
     # Get the JSON response
     response_data = response.json()
 
@@ -153,15 +155,15 @@ def test_start_conversation_missing_user_id(
     assert user_id_error is not None, "user_id error not found in response"
 
     # Verify each component of the error
-    assert user_id_error["type"] == "missing", (
-        f"Expected 'missing', got '{user_id_error['type']}'"
-    )
-    assert user_id_error["msg"] == "Field required", (
-        f"Expected 'Field required', got '{user_id_error['msg']}'"
-    )
-    assert user_id_error["input"] is None, (
-        f"Expected None, got {user_id_error['input']}"
-    )
+    assert (
+        user_id_error["type"] == "missing"
+    ), f"Expected 'missing', got '{user_id_error['type']}'"
+    assert (
+        user_id_error["msg"] == "Field required"
+    ), f"Expected 'Field required', got '{user_id_error['msg']}'"
+    assert (
+        user_id_error["input"] is None
+    ), f"Expected None, got {user_id_error['input']}"
 
     print("Test passed: Response contains the expected 'missing user_id' error")
 
@@ -185,9 +187,9 @@ def test_start_conversation_invalid_user_id(
     )
 
     # Assert
-    assert response.status_code == status.HTTP_404_NOT_FOUND, (
-        f"Expected status code status.HTTP_404_NOT_FOUND, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_404_NOT_FOUND
+    ), f"Expected status code status.HTTP_404_NOT_FOUND, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -196,9 +198,9 @@ def test_start_conversation_invalid_user_id(
     assert "detail" in response_data, "Response missing 'detail' field"
 
     # Assert the error message
-    assert response_data["detail"] == "User not found", (
-        f"Expected 'User not found', got '{response_data['detail']}'"
-    )
+    assert (
+        response_data["detail"] == "User not found"
+    ), f"Expected 'User not found', got '{response_data['detail']}'"
 
     print("Test passed: Response contains the expected 'user not found' error")
 
@@ -256,19 +258,19 @@ def test_continue_conversation(
     )
 
     # Assert
-    assert response.status_code == status.HTTP_200_OK, (
-        f"Expected status code status.HTTP_200_OK, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_200_OK
+    ), f"Expected status code status.HTTP_200_OK, got {response.status_code}"
     response_data = response.json()
 
     # Assert the response structure
     assert "id" in response_data
-    assert response_data["user_id"] == str(user_id), (
-        f"Expected user_id {user_id}, got {response_data['user_id']}"
-    )
-    assert response_data["title"] == conversation.title, (
-        f"Expected title {conversation.title}, got {response_data['title']}"
-    )
+    assert response_data["user_id"] == str(
+        user_id
+    ), f"Expected user_id {user_id}, got {response_data['user_id']}"
+    assert (
+        response_data["title"] == conversation.title
+    ), f"Expected title {conversation.title}, got {response_data['title']}"
     assert "messages" in response_data, "Expected messages in response"
     assert (
         len(response_data["messages"]) == 3  # noqa: PLR2004
@@ -276,61 +278,61 @@ def test_continue_conversation(
 
     # Check user message details
     assert response_data["messages"][1]["role"] == "user", "Expected user message role"
-    assert response_data["messages"][1]["content"] == request_data["content"], (
-        f"Expected user message content {request_data['content']}, got {response_data['messages'][2]['content']}"
-    )
+    assert (
+        response_data["messages"][1]["content"] == request_data["content"]
+    ), f"Expected user message content {request_data['content']}, got {response_data['messages'][2]['content']}"
 
     # Check AI message details
-    assert response_data["messages"][2]["role"] == "assistant", (
-        "Expected assistant message role"
-    )
-    assert response_data["messages"][2]["content"] == expected_ai_response["content"], (
-        f"Expected assistant message content {expected_ai_response['content']}, got {response_data['messages'][1]['content']}"
-    )
+    assert (
+        response_data["messages"][2]["role"] == "assistant"
+    ), "Expected assistant message role"
+    assert (
+        response_data["messages"][2]["content"] == expected_ai_response["content"]
+    ), f"Expected assistant message content {expected_ai_response['content']}, got {response_data['messages'][1]['content']}"
 
     mock_langchain_service.conversation.assert_awaited_once()
     call_args = mock_langchain_service.conversation.call_args
-    assert call_args[0][0] == str(response_data["id"]), (
-        f"Expected conversation ID {response_data['id']}, got {call_args[0][0]}"
-    )
-    assert call_args[0][1] == request_data["content"], (
-        f"Expected user input {request_data['content']}, got {call_args[0][1]}"
-    )
-    assert "user_context" not in call_args.kwargs, (
-        f"Expected the keyword argument 'user_context' to be not present if passed with None, got {call_args.kwargs}"
-    )
+    assert call_args[0][0] == str(
+        response_data["id"]
+    ), f"Expected conversation ID {response_data['id']}, got {call_args[0][0]}"
+    assert (
+        call_args[0][1] == request_data["content"]
+    ), f"Expected user input {request_data['content']}, got {call_args[0][1]}"
+    assert (
+        "user_context" not in call_args.kwargs
+    ), f"Expected the keyword argument 'user_context' to be not present if passed with None, got {call_args.kwargs}"
 
     db_conversation = session.get(Conversation, response_data["id"])
-    assert db_conversation is not None, (
-        "Expected conversation to be saved in the database"
-    )
-    assert db_conversation.user_id == user_id, (
-        f"Expected conversation user ID {user_id}, got {db_conversation.user_id}"
-    )
-    assert db_conversation.title == conversation.title, (
-        f"Expected conversation title {conversation.title}, got {db_conversation.title}"
-    )
+    assert (
+        db_conversation is not None
+    ), "Expected conversation to be saved in the database"
+    assert (
+        db_conversation.user_id == user_id
+    ), f"Expected conversation user ID {user_id}, got {db_conversation.user_id}"
+    assert (
+        db_conversation.title == conversation.title
+    ), f"Expected conversation title {conversation.title}, got {db_conversation.title}"
     assert (
         len(db_conversation.messages) == 3  # noqa: PLR2004
     ), f"Expected 3 messages in conversation, got {len(db_conversation.messages)}"
-    assert db_conversation.messages[1].role == "user", (
-        "Expected user message role in conversation"
-    )
-    assert db_conversation.messages[1].content == request_data["content"], (
-        f"Expected user message content {request_data['content']}, got {db_conversation.messages[0].content}"
-    )
-    assert db_conversation.messages[1].message_data is None, (
-        "Expected user message data to be None"
-    )
-    assert db_conversation.messages[2].role == "assistant", (
-        "Expected assistant message role in conversation"
-    )
-    assert db_conversation.messages[2].content == expected_ai_response["content"], (
-        f"Expected assistant message content {expected_ai_response['content']}, got {db_conversation.messages[1].content}"
-    )
-    assert db_conversation.messages[2].message_data == expected_ai_response_metadata, (
-        f"Expected assistant message data {expected_ai_response_metadata}, got {db_conversation.messages[2].message_data}"
-    )
+    assert (
+        db_conversation.messages[1].role == "user"
+    ), "Expected user message role in conversation"
+    assert (
+        db_conversation.messages[1].content == request_data["content"]
+    ), f"Expected user message content {request_data['content']}, got {db_conversation.messages[0].content}"
+    assert (
+        db_conversation.messages[1].message_data is None
+    ), "Expected user message data to be None"
+    assert (
+        db_conversation.messages[2].role == "assistant"
+    ), "Expected assistant message role in conversation"
+    assert (
+        db_conversation.messages[2].content == expected_ai_response["content"]
+    ), f"Expected assistant message content {expected_ai_response['content']}, got {db_conversation.messages[1].content}"
+    assert (
+        db_conversation.messages[2].message_data == expected_ai_response_metadata
+    ), f"Expected assistant message data {expected_ai_response_metadata}, got {db_conversation.messages[2].message_data}"
     print("Test passed: Response contains the expected conversation")
 
 
@@ -352,9 +354,9 @@ def test_continue_conversation_missing_conversation_id(
     response = client.post("/v1/conversations", json=request_data)
 
     # Assert
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
-        f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    ), f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -372,18 +374,18 @@ def test_continue_conversation_missing_conversation_id(
             break
 
     # Assert that we found the conversation_id error
-    assert conversation_id_error is not None, (
-        "conversation_id error not found in response"
-    )
-    assert conversation_id_error["type"] == "missing", (
-        f"Expected 'missing', got '{conversation_id_error['type']}'"
-    )
-    assert conversation_id_error["msg"] == "Field required", (
-        f"Expected 'Field required', got '{conversation_id_error['msg']}'"
-    )
-    assert conversation_id_error["input"] is None, (
-        f"Expected None, got {conversation_id_error['input']}"
-    )
+    assert (
+        conversation_id_error is not None
+    ), "conversation_id error not found in response"
+    assert (
+        conversation_id_error["type"] == "missing"
+    ), f"Expected 'missing', got '{conversation_id_error['type']}'"
+    assert (
+        conversation_id_error["msg"] == "Field required"
+    ), f"Expected 'Field required', got '{conversation_id_error['msg']}'"
+    assert (
+        conversation_id_error["input"] is None
+    ), f"Expected None, got {conversation_id_error['input']}"
     print("Test passed: Response contains the expected 'missing conversation_id' error")
 
 
@@ -412,9 +414,9 @@ def test_continue_conversation_invalid_conversation_id(
     )
 
     # Assert
-    assert response.status_code == status.HTTP_404_NOT_FOUND, (
-        f"Expected status code status.HTTP_404_NOT_FOUND, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_404_NOT_FOUND
+    ), f"Expected status code status.HTTP_404_NOT_FOUND, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -423,9 +425,9 @@ def test_continue_conversation_invalid_conversation_id(
     assert "detail" in response_data, "Response missing 'detail' field"
 
     # Assert the error message
-    assert response_data["detail"] == "Conversation not found", (
-        f"Expected 'Conversation not found', got '{response_data['detail']}'"
-    )
+    assert (
+        response_data["detail"] == "Conversation not found"
+    ), f"Expected 'Conversation not found', got '{response_data['detail']}'"
 
     print("Test passed: Response contains the expected 'conversation not found' error")
 
@@ -446,9 +448,9 @@ def test_get_conversations(client: TestClient, session: Session, test_user: User
     response = client.get("/v1/conversations", params={"user_id": user_id})
 
     # Assert
-    assert response.status_code == status.HTTP_200_OK, (
-        f"Expected status code status.HTTP_200_OK, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_200_OK
+    ), f"Expected status code status.HTTP_200_OK, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -460,12 +462,12 @@ def test_get_conversations(client: TestClient, session: Session, test_user: User
     assert len(response_data) == 1, f"Expected 1 conversation, got {len(response_data)}"
 
     # Check conversation details
-    assert response_data[0]["id"] == str(conversation.id), (
-        f"Expected conversation ID {conversation.id}, got {response_data[0]['id']}"
-    )
-    assert response_data[0]["user_id"] == str(user_id), (
-        f"Expected user ID {user_id}, got {response_data[0]['user_id']}"
-    )
+    assert response_data[0]["id"] == str(
+        conversation.id
+    ), f"Expected conversation ID {conversation.id}, got {response_data[0]['id']}"
+    assert response_data[0]["user_id"] == str(
+        user_id
+    ), f"Expected user ID {user_id}, got {response_data[0]['user_id']}"
     print("Test passed: Response contains the expected conversations")
 
 
@@ -482,9 +484,9 @@ def test_get_conversations_no_conversations(
     response = client.get("/v1/conversations", params={"user_id": user_id})
 
     # Assert
-    assert response.status_code == status.HTTP_404_NOT_FOUND, (
-        f"Expected status code status.HTTP_404_NOT_FOUND, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_404_NOT_FOUND
+    ), f"Expected status code status.HTTP_404_NOT_FOUND, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -493,9 +495,9 @@ def test_get_conversations_no_conversations(
     assert "detail" in response_data, "Response missing 'detail' field"
 
     # Assert the error message
-    assert response_data["detail"] == "No conversations found", (
-        f"Expected 'No conversations found', got '{response_data['detail']}'"
-    )
+    assert (
+        response_data["detail"] == "No conversations found"
+    ), f"Expected 'No conversations found', got '{response_data['detail']}'"
 
     print("Test passed: Response contains the expected 'no conversations found' error")
 
@@ -509,9 +511,9 @@ def test_get_conversations_missing_user_id(client: TestClient, session: Session)
     response = client.get("/v1/conversations")
 
     # Assert
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
-        f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    ), f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -532,15 +534,15 @@ def test_get_conversations_missing_user_id(client: TestClient, session: Session)
     assert user_id_error is not None, "user_id error not found in response"
 
     # Verify each component of the error
-    assert user_id_error["type"] == "missing", (
-        f"Expected 'missing', got '{user_id_error['type']}'"
-    )
-    assert user_id_error["msg"] == "Field required", (
-        f"Expected 'Field required', got '{user_id_error['msg']}'"
-    )
-    assert user_id_error["input"] is None, (
-        f"Expected None, got {user_id_error['input']}"
-    )
+    assert (
+        user_id_error["type"] == "missing"
+    ), f"Expected 'missing', got '{user_id_error['type']}'"
+    assert (
+        user_id_error["msg"] == "Field required"
+    ), f"Expected 'Field required', got '{user_id_error['msg']}'"
+    assert (
+        user_id_error["input"] is None
+    ), f"Expected None, got {user_id_error['input']}"
 
     print("Test passed: Response contains the expected 'missing user_id' error")
 
@@ -558,9 +560,9 @@ def test_get_conversations_invalid_user_id(client: TestClient, session: Session)
     response = client.get("/v1/conversations", params={"user_id": invalid_user_id})
 
     # Assert
-    assert response.status_code == status.HTTP_404_NOT_FOUND, (
-        f"Expected status code status.HTTP_404_NOT_FOUND, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_404_NOT_FOUND
+    ), f"Expected status code status.HTTP_404_NOT_FOUND, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -568,9 +570,9 @@ def test_get_conversations_invalid_user_id(client: TestClient, session: Session)
     assert "detail" in response_data, "Response missing 'detail' field"
 
     # Assert the error message
-    assert response_data["detail"] == "User not found", (
-        f"Expected 'User not found', got '{response_data['detail']}'"
-    )
+    assert (
+        response_data["detail"] == "User not found"
+    ), f"Expected 'User not found', got '{response_data['detail']}'"
 
     print("Test passed: Response contains the expected 'user not found' error")
 
@@ -596,9 +598,9 @@ def test_start_conversation_invalid_uuid(
     )
 
     # Assert
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
-        f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    ), f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -619,12 +621,12 @@ def test_start_conversation_invalid_uuid(
     assert user_id_error is not None, "user_id error not found in response"
 
     # Verify each component of the error
-    assert user_id_error["type"] == "uuid_parsing", (
-        f"Expected 'uuid_parsing', got '{user_id_error['type']}'"
-    )
-    assert "Input should be a valid UUID, invalid character" in user_id_error["msg"], (
-        f"Expected 'Input should be a valid UUID, invalid character', got '{user_id_error['msg']}'"
-    )
+    assert (
+        user_id_error["type"] == "uuid_parsing"
+    ), f"Expected 'uuid_parsing', got '{user_id_error['type']}'"
+    assert (
+        "Input should be a valid UUID, invalid character" in user_id_error["msg"]
+    ), f"Expected 'Input should be a valid UUID, invalid character', got '{user_id_error['msg']}'"
 
     print("Test passed: Response contains the expected 'invalid UUID format' error")
 
@@ -648,9 +650,9 @@ def test_start_conversation_invalid_json_payload(
     response = client.post("/v1/new", json=invalid_payload, params={"user_id": user_id})
 
     # Assert
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
-        f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    ), f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -666,12 +668,12 @@ def test_start_conversation_invalid_json_payload(
     assert json_error is not None, "json_error not found in response"
 
     # Verify each component of the error
-    assert json_error["type"] == "model_attributes_type", (
-        f"Expected 'model_attributes_type', got '{json_error['type']}'"
-    )
-    assert "Input should be a valid dictionary" in json_error["msg"], (
-        f"Expected 'Input should be a valid dictionary', got '{json_error['msg']}'"
-    )
+    assert (
+        json_error["type"] == "model_attributes_type"
+    ), f"Expected 'model_attributes_type', got '{json_error['type']}'"
+    assert (
+        "Input should be a valid dictionary" in json_error["msg"]
+    ), f"Expected 'Input should be a valid dictionary', got '{json_error['msg']}'"
 
     print("Test passed: Response contains the expected 'invalid JSON format' error")
 
@@ -705,9 +707,9 @@ def test_continue_conversation_invalid_json_payload(
     )
 
     # Assert
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
-        f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    ), f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -723,12 +725,12 @@ def test_continue_conversation_invalid_json_payload(
     assert json_error is not None, "json_error not found in response"
 
     # Verify each component of the error
-    assert json_error["type"] == "model_attributes_type", (
-        f"Expected 'model_attributes_type', got '{json_error['type']}'"
-    )
-    assert "Input should be a valid dictionary" in json_error["msg"], (
-        f"Expected 'Input should be a valid dictionary', got '{json_error['msg']}'"
-    )
+    assert (
+        json_error["type"] == "model_attributes_type"
+    ), f"Expected 'model_attributes_type', got '{json_error['type']}'"
+    assert (
+        "Input should be a valid dictionary" in json_error["msg"]
+    ), f"Expected 'Input should be a valid dictionary', got '{json_error['msg']}'"
 
     print("Test passed: Response contains the expected 'invalid JSON format' error")
 
@@ -750,9 +752,9 @@ def test_start_conversation_empty_payload(
     response = client.post("/v1/new", json=empty_payload, params={"user_id": user_id})
 
     # Assert
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
-        f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    ), f"Expected status code status.HTTP_422_UNPROCESSABLE_ENTITY, got {response.status_code}"
 
     # Get the JSON response
     response_data = response.json()
@@ -767,12 +769,12 @@ def test_start_conversation_empty_payload(
     assert json_error is not None, "json_error not found in response"
 
     # Verify each component of the error
-    assert json_error["type"] == "missing", (
-        f"Expected 'missing', got '{json_error['type']}'"
-    )
-    assert json_error["msg"] == "Field required", (
-        f"Expected 'Field required', got '{json_error['msg']}'"
-    )
+    assert (
+        json_error["type"] == "missing"
+    ), f"Expected 'missing', got '{json_error['type']}'"
+    assert (
+        json_error["msg"] == "Field required"
+    ), f"Expected 'Field required', got '{json_error['msg']}'"
     assert json_error["input"] == {}, f"Expected {{}}, got {json_error['input']}"
 
     print("Test passed: Response contains the expected 'empty payload' error")
@@ -797,18 +799,18 @@ def test_start_conversation_empty_content(
     )
 
     # Assert
-    assert response.status_code == status.HTTP_400_BAD_REQUEST, (
-        f"Expected status code status.HTTP_400_BAD_REQUEST, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_400_BAD_REQUEST
+    ), f"Expected status code status.HTTP_400_BAD_REQUEST, got {response.status_code}"
     # Get the JSON response
     response_data = response.json()
     # Assert the error structure
     assert "detail" in response_data, "Response missing 'detail' field"
 
     # Assert the error message
-    assert response_data["detail"] == "Message content cannot be empty", (
-        f"Expected 'Message content cannot be empty', got '{response_data['detail']}'"
-    )
+    assert (
+        response_data["detail"] == "Message content cannot be empty"
+    ), f"Expected 'Message content cannot be empty', got '{response_data['detail']}'"
 
     print("Test passed: Response contains the expected 'user not found' error")
 
@@ -839,16 +841,16 @@ def test_start_conversation_langchain_error(
     response = client.post("/v1/new", json=request_data, params={"user_id": user_id})
 
     # Assert
-    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR, (
-        f"Expected status code status.HTTP_500_INTERNAL_SERVER_ERROR, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    ), f"Expected status code status.HTTP_500_INTERNAL_SERVER_ERROR, got {response.status_code}"
     response_data = response.json()
 
     # Assert the error structure
     assert "detail" in response_data, "Response missing 'detail' field"
-    assert "error" in response_data["detail"].lower(), (
-        f"Expected error message, got '{response_data['detail']}'"
-    )
+    assert (
+        "error" in response_data["detail"].lower()
+    ), f"Expected error message, got '{response_data['detail']}'"
 
     # Verify the mock was called
     mock_langchain_service.conversation.assert_awaited_once()
@@ -881,16 +883,16 @@ def test_start_conversation_langchain_not_initialized(
     response = client.post("/v1/new", json=request_data, params={"user_id": user_id})
 
     # Assert
-    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR, (
-        f"Expected status code status.HTTP_500_INTERNAL_SERVER_ERROR, got {response.status_code}"
-    )
+    assert (
+        response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    ), f"Expected status code status.HTTP_500_INTERNAL_SERVER_ERROR, got {response.status_code}"
     response_data = response.json()
 
     # Assert the error structure
     assert "detail" in response_data, "Response missing 'detail' field"
-    assert "error" in response_data["detail"].lower(), (
-        f"Expected error message, got '{response_data['detail']}'"
-    )
+    assert (
+        "error" in response_data["detail"].lower()
+    ), f"Expected error message, got '{response_data['detail']}'"
 
     print(
         "Test passed: Response contains the expected Langchain service error when not initialized"

@@ -47,7 +47,7 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:  # noqa: N802
         return MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.DB_USERNAME,
