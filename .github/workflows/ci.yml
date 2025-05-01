@@ -39,7 +39,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        working-directory: ./app
+        working-directory: ./backend/app
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -49,17 +49,17 @@ jobs:
             echo "requirements-dev.txt not found, skipping."
 
       - name: Check formatting with Black
-        working-directory: ./app
+        working-directory: ./backend/app
         run: |
           black . --check
 
       - name: Lint with Ruff
-        working-directory: ./app
+        working-directory: ./backend/app
         run: |
           ruff check .
 
       - name: Test with Pytest
-        working-directory: ./app
+        working-directory: ./backend/app
         env:
           # Environment variables for Pytest and SQLModel/SQLAlchemy engine
           APP_ENV: test
