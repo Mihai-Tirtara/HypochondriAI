@@ -24,6 +24,7 @@ def test_start_conversation(
         "content": f"AI response to:{user_content}",
         "role": "assistant",
     }
+    conversation_length = 2
     message_data = {
         "id": None,
         "name": None,
@@ -56,8 +57,8 @@ def test_start_conversation(
     ), f"Expected title {request_data['content'][:20]}, got {response_data['title']}"
     assert "messages" in response_data, "Expected messages in response"
     assert (
-        len(response_data["messages"]) == 2
-    ), f"Expected 2 messages, got {len(response_data['messages'])}"  # noqa: PLR2004
+        len(response_data["messages"]) == conversation_length
+    ), f"Expected 2 messages, got {len(response_data['messages'])}"
 
     # Check user message details
     assert response_data["messages"][0]["role"] == "user", "Expected user message role"
@@ -84,7 +85,6 @@ def test_start_conversation(
     assert (
         "user_context" not in call_args.kwargs
     ), f"Expected the keyword argument 'user_context' to be not present if passed with None, got {call_args.kwargs}"
-
     db_conversation = session.get(Conversation, response_data["id"])
     assert (
         db_conversation is not None
@@ -96,10 +96,8 @@ def test_start_conversation(
         db_conversation.title == request_data["content"][:20]
     ), f"Expected conversation title {request_data['content'][:20]}, got {db_conversation.title}"
     assert (
-        len(db_conversation.messages) == 2
-    ), (  # noqa: PLR2004
-        f"Expected 2 messages in conversation, got {len(db_conversation.messages)}"
-    )
+        len(db_conversation.messages) == conversation_length
+    ), f"Expected 2 messages in conversation, got {len(db_conversation.messages)}"
     assert (
         db_conversation.messages[0].role == "user"
     ), "Expected user message role in conversation"
