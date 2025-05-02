@@ -2,12 +2,6 @@
 
 A comprehensive chatbot for providing AI-powered insights and support for people struggling with health anxiety.
 
-## 🚨 Important Notice - Work in Progress 🚨
-
-**The application is currently undergoing a major architectural change.**
-
-- The frontend is temporarily not functioning due to backend API changes
-
 ## Project Architecture
 
 The application consists of three main components:
@@ -74,22 +68,21 @@ npm start
 - ✅ Added PostgreSQL database integration with SQLModel and Alembic
 - ✅ Created comprehensive API endpoints for conversation management
 - ✅ Testing framework and CI pipeline implemented
-- ❌ Frontend not currently compatible with new backend architecture
+- ✅ Frontend compatible with new backend architecture
+- ❌ Large UI improvements as the current is just a test version
 
 ## Next Steps
 
 The  development roadmap in order of priority:
 
 1. **Frontend Updates**:
-   - Update frontend to work with new API endpoints
    - Implement UI improvements for conversation flow
    - Add proper error handling
-   - Add proper E2E testing 
+   - Add proper E2E testing
 
 2. **Future Enhancements**:
    - Docker containerization
    - User authentication and session management
-   - Kubernetes setup
    - CD pipeline setup
    - AWS API Gateway integration
    - Implement RAG for up-to date information
