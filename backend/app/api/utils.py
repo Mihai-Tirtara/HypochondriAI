@@ -18,7 +18,7 @@ from app.services.llm import LangchainService
 logger = logging.getLogger(__name__)
 
 
-def save_conversation(db: Session, user_id: UUID, title: Optional[str]) -> Conversation:
+def save_conversation(db: Session, user_id: UUID, title: str | None) -> Conversation:
     """
     Create the conversation object and save it to the database
 
@@ -47,7 +47,7 @@ def save_message(
     conversation_id: UUID,
     content: str,
     role: MessageRole,
-    message_data: Optional[dict[str, Any]] = None,
+    message_data: dict[str, Any] | None = None,
 ) -> Message:
     """
     Create the message object and save it to the database
@@ -82,7 +82,7 @@ def save_message(
     return db_message
 
 
-def serialise_message_data(ai_response: Any) -> Optional[dict[str, Any]]:
+def serialise_message_data(ai_response: Any) -> dict[str, Any] | None:
     """
             Serializes the AI response message data into a dictionary format.
 

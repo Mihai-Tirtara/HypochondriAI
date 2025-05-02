@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
 
     # AWS settings
-    AWS_ACCESS_KEY_ID: Optional[str] = None
-    AWS_SECRET_ACCESS_KEY: Optional[str] = None
+    AWS_ACCESS_KEY_ID: str | None = None
+    AWS_SECRET_ACCESS_KEY: str | None = None
     AWS_REGION: str = "eu-central-1"
 
     # Bedrock settings
@@ -38,12 +38,12 @@ class Settings(BaseSettings):
     # Database settings
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
-    DB_USERNAME: Optional[str] = None
-    DB_PASSWORD: Optional[str] = None
-    DB_NAME: Optional[str] = None
-    DB_SUPERUSER_USERNAME: Optional[str] = None
-    DB_SUPERUSER_PASSWORD: Optional[str] = None
-    DB_SUPERUSER_EMAIL: Optional[str] = None
+    DB_USERNAME: str | None = None
+    DB_PASSWORD: str | None = None
+    DB_NAME: str | None = None
+    DB_SUPERUSER_USERNAME: str | None = None
+    DB_SUPERUSER_PASSWORD: str | None = None
+    DB_SUPERUSER_EMAIL: str | None = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property

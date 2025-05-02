@@ -40,7 +40,7 @@ def mock_langchain_service_fixture():
     mock_service = MagicMock(spec=LangchainService)
 
     async def mock_conversation(
-        conversation_id: str, user_input: str, user_context: Optional[str] = None
+        conversation_id: str, user_input: str, user_context: str | None = None
     ):
         # Mock the conversation method to return a fixed response
         # Save original class attributes to restore later

@@ -21,21 +21,19 @@ class State(TypedDict):
     """State for Langchain service"""
 
     messages: Annotated[Sequence[BaseMessage], add_messages]
-    user_context: Optional[str]
+    user_context: str | None
 
 
 class LangchainService:
-    graph: Optional[Any] = None  # Use Any or more specific type if available
+    graph: Any | None = None  # Use Any or more specific type if available
     checkpointer = None  # Union type for checkpointer
-    model: Optional[Any] = None  # Use Any or more specific ChatModel type
-    db_pool: Optional[AsyncConnectionPool] = None  # Store the pool instance
-    _model_id: Optional[str] = None
-    _model_provider: Optional[str] = None
+    model: Any | None = None  # Use Any or more specific ChatModel type
+    db_pool: AsyncConnectionPool | None = None  # Store the pool instance
+    _model_id: str | None = None
+    _model_provider: str | None = None
     _initialized: bool = False
 
-    def __init__(
-        self, model_id: Optional[str] = None, model_provider: Optional[str] = None
-    ):
+    def __init__(self, model_id: str | None = None, model_provider: str | None = None):
         """
         Initialize Langchain service with optional model and provider
 
@@ -86,7 +84,7 @@ class LangchainService:
 
     @classmethod
     async def initialize_langchain_components(
-        cls, model_id: Optional[str] = None, model_provider: Optional[str] = None
+        cls, model_id: str | None = None, model_provider: str | None = None
     ):
         """
         Set up all the necessary componnents  for the Langchain service.
@@ -109,7 +107,7 @@ class LangchainService:
 
     @classmethod
     def _initialize_model(
-        cls, model_id: Optional[str] = None, model_provider: Optional[str] = None
+        cls, model_id: str | None = None, model_provider: str | None = None
     ):
         """
         Initialize the model with the given ID and provider.
@@ -220,7 +218,7 @@ class LangchainService:
             logger.info("Graph already initialized.")
 
     async def conversation(
-        self, conversation_id: str, user_input: str, user_context: Optional[str] = None
+        self, conversation_id: str, user_input: str, user_context: str | None = None
     ):
         """
         Create a conversation with the chat model or continue an existing one.

@@ -1,6 +1,6 @@
 [tool.ruff]
 # Target Python version - adjust to match your project's Python version
-target-version = "py39"
+target-version = "py311"
 
 # Set the line length to match your project's style
 line-length = 88
@@ -58,4 +58,4 @@ max-complexity = 10  # Set your desired complexity threshold
 # Add Black configuration
 [tool.black]
 line-length = 88
-target-version = ['py39']
+target-version = ['py311']

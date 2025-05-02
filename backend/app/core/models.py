@@ -56,7 +56,7 @@ class MessageBase(SQLModel):
 
 
 class MessageCreate(MessageBase):
-    message_data: Optional[dict[str, Any]] = None
+    message_data: dict[str, Any] | None = None
 
 
 class MessagePublic(MessageBase):
@@ -69,7 +69,7 @@ class Message(MessageBase, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     conversation_id: uuid.UUID = Field(foreign_key="conversations.id", index=True)
-    message_data: Optional[dict[str, Any]] = Field(
+    message_data: dict[str, Any] | None = Field(
         default=None, sa_column=Column(JSONB, nullable=True)
     )
     created_at: datetime = Field(
@@ -83,7 +83,7 @@ class Message(MessageBase, table=True):
 
 
 class ConversationBase(SQLModel):
-    title: Optional[str] = Field(default=None, max_length=100)
+    title: str | None = Field(default=None, max_length=100)
 
 
 class ConversationCreate(ConversationBase):
