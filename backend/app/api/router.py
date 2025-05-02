@@ -55,7 +55,7 @@ async def start_conversation(
         db=db,
         conversation_id=new_conversation.id,
         content=query.content,
-        role=MessageRole.USER,
+        role=MessageRole.user,
         message_data=None,
     )
 
@@ -107,7 +107,7 @@ async def continue_conversation(
         db=db,
         conversation_id=conversation_id,
         content=query.content,
-        role="user",
+        role=MessageRole.user,
         message_data=None,
     )
 

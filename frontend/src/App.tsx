@@ -1,4 +1,5 @@
 import SymptomForm from './components/Symptomps';
+import TestEndpoint from './components/TestEndpoint';
 import './App.css';
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
       </header>
 
       <main className="container mx-auto py-8 px-4">
-        <SymptomForm />
+        <TestEndpoint></TestEndpoint>
       </main>
 
       <footer className="bg-gray-800 text-white p-6 mt-12">

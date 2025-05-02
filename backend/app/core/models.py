@@ -38,9 +38,9 @@ class User(UserBase, table=True):
 
 
 class MessageRole(str, Enum):
-    USER = "user"
-    ASSISTANT = "assistant"
-    SYSTEM = "system"  # Add more roles as needed
+    user = "user"
+    assistant = "assistant"
+    system = "system"  # Add more roles as needed
 
     def __str__(self):
         return self.value
@@ -49,9 +49,7 @@ class MessageRole(str, Enum):
 class MessageBase(SQLModel):
     content: str = Field()
     role: MessageRole = Field(
-        sa_column=Column(
-            SQLAlchemyEnum(MessageRole), nullable=False, name="messagerole"
-        )
+        sa_column=Column(SQLAlchemyEnum(MessageRole), nullable=False)
     )
 
 

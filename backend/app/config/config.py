@@ -5,7 +5,7 @@ from pydantic import PostgresDsn, computed_field
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings
 
-APP_ENV = os.getenv("APP_ENV", "development")
+APP_ENV = os.getenv("APP_ENV", "dev")
 env_file = ".env.test" if APP_ENV == "test" else ".env"
 print(f"Using environment file: {env_file}")
 
@@ -47,8 +47,8 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:  # noqa: N802
-        return MultiHostUrl.build(
+    def SQLALCHEMY_DATABASE_URI(self) -> str:  # noqa: N802
+        base_url = MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.DB_USERNAME,
             password=self.DB_PASSWORD,
@@ -56,10 +56,11 @@ class Settings(BaseSettings):
             port=self.DB_PORT,
             path=self.DB_NAME,
         )
-        params = {"pool_size": "20", "pool_pre_ping": "true", "connect_timeout": "10"}
+        # params = {"pool_pre_ping": "true", "connect_timeout": "10"}
         # Join parameters into a query string
-        query_string = "&".join(f"{k}={v}" for k, v in params.items())
-        return f"{query_string}"
+        # query_string = "&".join(f"{k}={v}" for k, v in params.items())
+        # return f"{base_url}?{query_string}"
+        return base_url
 
     # Logging
     LOG_LEVEL: str = "INFO"

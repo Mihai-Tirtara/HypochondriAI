@@ -43,6 +43,8 @@ def create_message(
     message_db = Message.model_validate(
         message_create, update={"conversation_id": conversation_id}
     )
+    print("THis is how the message lookg before being saved in the database")
+    print(message_db)
     session.add(message_db)
     session.commit()
     session.refresh(message_db)

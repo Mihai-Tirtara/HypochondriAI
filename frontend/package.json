@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@hey-api/client-axios": "^0.7.0",
     "@tailwindcss/vite": "^4.0.17",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -20,15 +21,15 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.4.0",
     "tailwindcss": "^4.0.17",
-    "typescript": "^4.9.5",
     "vite": "^6.2.4",
     "web-vitals": "^2.1.4"
   },
-"scripts": {
-  "start": "vite",
-  "build": "vite build",
-  "serve": "vite preview"
-},
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "generate-client": "openapi-ts --input http://localhost:8000/openapi.json --output ./src/client --client @hey-api/client-axios"
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -48,7 +49,9 @@
     ]
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.66.7",
     "@types/istanbul-reports": "^3.0.4",
-    "@types/node": "^22.13.14"
+    "@types/node": "^22.13.14",
+    "typescript": "^5.8.3"
   }
 }

@@ -84,13 +84,11 @@ def save_message(
 
 def serialise_message_data(ai_response: Any) -> dict[str, Any] | None:
     """
-            Serializes the AI response message data into a dictionary format.
-
-            Args:
-            aiResponse (Any): The AI response object.
-
-            Returns:
-    Optional[Dict[str, Any]]: The serialized message data as a dictionary.
+    Serializes the AI response message data into a dictionary format.
+    Args:
+        aiResponse (Any): The AI response object.
+    Returns:
+        Optional[Dict[str, Any]]: The serialized message data as a dictionary.
     """
 
     message_data_dict = None
@@ -178,7 +176,7 @@ async def get_and_save_ai_response(
             db=db,
             conversation_id=conversation_id,
             content=ai_response.content,
-            role=MessageRole.ASSISTANT,
+            role=MessageRole.assistant,
             message_data=ai_response_metadata,
         )
         return ai_message

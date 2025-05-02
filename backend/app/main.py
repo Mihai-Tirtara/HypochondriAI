@@ -1,8 +1,10 @@
 import logging
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import router
+from app.api.router_test import router_test
 from app.config.config import settings
 from app.services.llm import LangchainService
 
@@ -17,6 +19,14 @@ app = FastAPI(
     title=settings.APP_NAME,
     description=settings.APP_DESCRIPTION,
     version=settings.APP_VERSION,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Your React app URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -50,6 +60,7 @@ async def on_shutdown():
 
 # Include the router
 app.include_router(router)
+app.include_router(router_test)
 
 if __name__ == "__main__":
     import uvicorn

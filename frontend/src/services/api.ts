@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Define API base URL - change this to match your Spring Boot backend
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:8000';
 
 // Define types
 export interface SymptomRequest {
@@ -11,7 +11,7 @@ export interface SymptomRequest {
 
 export interface SymptomResponse {
   response: string;
- 
+
 }
 
 // API function to analyze symptoms
@@ -22,7 +22,7 @@ export const analyzeSymptoms = async (request: SymptomRequest): Promise<SymptomR
         'Content-Type': 'application/json',
       },
     });
-    
+
     return response.data;
   } catch (error) {
     console.error('Error analyzing symptoms:', error);
