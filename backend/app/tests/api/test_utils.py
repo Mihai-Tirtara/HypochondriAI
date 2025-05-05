@@ -84,7 +84,7 @@ class TestUtils:
         """Test saveMessage with valid inputs."""
         # Arrange
         content = "Test message"
-        role = MessageRole.USER
+        role = MessageRole.user
         mock_message = MagicMock(spec=Message)
         mock_message.id = uuid.uuid4()
 
@@ -107,7 +107,7 @@ class TestUtils:
         """Test saveMessage with empty content."""
         # Arrange
         content = ""
-        role = MessageRole.USER
+        role = MessageRole.user
 
         # Act & Assert
         with pytest.raises(HTTPException) as exc_info:
@@ -125,7 +125,7 @@ class TestUtils:
         """Test saveMessage when create_message fails."""
         # Arrange
         content = "Test message"
-        role = MessageRole.USER
+        role = MessageRole.user
 
         with patch("app.api.utils.create_message", return_value=None):
             # Act & Assert

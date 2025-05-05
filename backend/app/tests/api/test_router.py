@@ -18,7 +18,7 @@ def test_start_conversation(
     # Arrange
     user_id = test_user.id  # Assuming you have a test user created in your fixtures
     user_content = "Hello, how are you?"
-    user_role = MessageRole.USER
+    user_role = MessageRole.user
     request_data = {"content": user_content, "role": user_role}
     expected_ai_response = {
         "content": f"AI response to:{user_content}",
@@ -124,7 +124,7 @@ def test_start_conversation_missing_user_id(
     """
     # Arrange
     user_content = "Hello, I have no user_ID"
-    user_role = MessageRole.USER
+    user_role = MessageRole.user
     request_data = {"content": user_content, "role": user_role}
 
     # Act
@@ -825,7 +825,7 @@ def test_start_conversation_langchain_error(
     # Arrange
     user_id = test_user.id
     user_content = "Hello, how are you?"
-    user_role = MessageRole.USER
+    user_role = MessageRole.user
     request_data = {"content": user_content, "role": user_role}
 
     # For async methods, we need to make the side_effect an async function that raises an exception
@@ -868,7 +868,7 @@ def test_start_conversation_langchain_not_initialized(
     # Arrange
     user_id = test_user.id
     user_content = "Hello, how are you?"
-    user_role = MessageRole.USER
+    user_role = MessageRole.user
     request_data = {"content": user_content, "role": user_role}
 
     # Configure mock to raise an exception
