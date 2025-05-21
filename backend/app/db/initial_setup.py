@@ -1,4 +1,5 @@
 import logging
+import os
 
 from sqlmodel import Session, select
 
@@ -20,7 +21,7 @@ def init_db():
         superuser = session.exec(
             select(User).where(User.email == settings.DB_SUPERUSER_EMAIL)
         ).first()
-        if not superuser:
+        if not superuser and not os.getenv("TESTING"):
             logger.info("Intial user not found, creating...")
             intial_user = UserCreate(
                 username=settings.DB_SUPERUSER_USERNAME,

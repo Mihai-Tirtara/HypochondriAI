@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Optional
 from unittest.mock import AsyncMock, MagicMock  # Use AsyncMock for async methods
 
@@ -15,6 +16,8 @@ from app.main import app
 from app.services.llm import LangchainService
 
 logger = logging.getLogger(__name__)
+
+os.environ["TESTING"] = "True"
 
 
 @pytest.fixture(name="session", scope="function")
