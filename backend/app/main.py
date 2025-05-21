@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import router
 from app.api.router_test import router_test
 from app.config.config import settings
+from app.db.initial_setup import init_db
 from app.services.llm import LangchainService
 
 logging.basicConfig(
@@ -15,11 +17,35 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        init_db()
+        logger.info("DB initialization complete.")
+    except Exception as e:
+        logger.error(f"Error during database initilizations  {e}")
+        raise
+
+    try:
+        await LangchainService.initialize_langchain_components()
+        logger.info("Langchain components initialized successfully.")
+    except Exception as e:
+        logger.error(f"Error during Langchain initialization: {e}")
+        LangchainService._initialized = False
+        raise
+
+    yield
+    await LangchainService.close_pool()
+
+
 app = FastAPI(
     title=settings.APP_NAME,
     description=settings.APP_DESCRIPTION,
     version=settings.APP_VERSION,
+    lifespan=lifespan,
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,34 +54,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-async def on_startup():
-    logger.info("Running DB initialization...")
-    try:
-        # init_db()
-        logger.info("DB initialization complete.")
-    except Exception as e:
-        logger.error(f"Error during database initilizations  {e}")
-
-    logger.info("Initializing Langchain componenents...")
-    try:
-        await LangchainService.initialize_langchain_components()
-        logger.info("Langchain components initialized successfully.")
-    except Exception as e:
-        logger.error(f"Error during Langchain initialization: {e}")
-        # Set the class-level flag to indicate failure
-        LangchainService._initialized = False
-
-
-# Add or ensure the shutdown handler exists
-@app.on_event("shutdown")
-async def on_shutdown():
-    logger.info("Running application shutdown procedures...")
-    # Close the LangchainService resources (specifically the pool)
-    await LangchainService.close_pool()
-    logger.info("Application shutdown complete.")
 
 
 # Include the router
