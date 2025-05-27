@@ -8,7 +8,7 @@ The application consists of three main components:
 
 1. **Backend API** - Python FastAPI service with LangChain integration
 2. **Database** - PostgreSQL for conversation and user data persistence
-3. **Frontend** - React application (temporarily incompatible with current backend)
+3. **Frontend** - React application in Typescript 
 
 ## Local Development Setup
 
@@ -17,7 +17,7 @@ Follow these steps to set up and run the application locally:
 ### 1. Environment Setup
 
 ```bash
-# Ensure you have Python 3.9+ and Node.js installed
+# Ensure you have Python 3.11+ and Node.js installed
 # PostgreSQL database will be required according to config settings
 ```
 
@@ -48,7 +48,7 @@ DB_NAME=health_anxiety
 uvicorn main:app --reload
 ```
 
-### 3. Frontend (React) - Currently Not Compatible
+### 3. Frontend (React) 
 
 ```bash
 # Navigate to the frontend directory
@@ -82,13 +82,11 @@ The  development roadmap in order of priority:
 
 2. **Future Enhancements**:
    - Docker containerization
+   - Cost Management & Monitoring
    - User authentication and session management
-   - CD pipeline setup
-   - AWS API Gateway integration
-   - Implement RAG for up-to date information
-   - Additional features:
-     * Personalized recommendations
-     * Journal and symptom tracking
+   - Enhanced LLM Operations (Prompt optimization, RAG, etc)
+   - Infrastructure & DevOps
+
 
 ## Troubleshooting
 
