@@ -81,9 +81,10 @@ The  development roadmap in order of priority:
    - Add proper E2E testing
 
 2. **Future Enhancements**:
-   - Docker containerization
+   - Health Safety & Security Hardening
    - Cost Management & Monitoring
    - User authentication and session management
+   - Docker containerization
    - Enhanced LLM Operations (Prompt optimization, RAG, etc)
    - Infrastructure & DevOps
 
