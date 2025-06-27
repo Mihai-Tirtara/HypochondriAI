@@ -9,7 +9,7 @@ function App() {
       <header className="bg-primary-700 text-white p-4 shadow-md">
         <div className="container mx-auto">
           <h1 className="text-2xl font-bold">Health Anxiety Management App</h1>
-          <p className="text-sm opacity-80">Helping you manage health concerns with evidence-based information</p>
+          <p className="text-sm opacity-80">What cancer you have today?</p>
         </div>
       </header>
 
