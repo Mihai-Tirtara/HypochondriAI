@@ -26,7 +26,6 @@ class State(TypedDict):
 
 
 class LangchainService:
-    # Class variables maintained for test compatibility
     graph: Any | None = None
     checkpointer = None
     model: Any | None = None
@@ -34,8 +33,6 @@ class LangchainService:
     _model_id: str | None = None
     _model_provider: str | None = None
     _initialized: bool = False
-
-    # Singleton infrastructure
     _instance: Optional["LangchainService"] = None
     _creation_lock = asyncio.Lock()
 
@@ -46,18 +43,32 @@ class LangchainService:
 
     def __init__(self, model_id: str | None = None, model_provider: str | None = None):
         # Initialize instance variables if not already done
-        if not hasattr(self, "_initialized_instance"):
+        if not hasattr(self, "_initialized"):
             self._graph = None
             self._checkpointer = None
             self._model = None
             self._db_pool = None
-            self._initialized_instance = False
+            self._initialized = False
         LangchainService.initialize_bedrock_client()
+
+    @classmethod
+    async def get_instance(cls):
+        """Get the singleton instance with proper initialization."""
+        instance = cls()
+        await instance._ensure_initialized()
+        return instance
+
+    async def _ensure_initialized(self):
+        """Ensure the singleton instance is properly initialized with thread safety."""
+        if not self._initialized:
+            async with self._creation_lock:
+                if not self._initialized:  # Double-check locking
+                    await self._initialize_all_resources()
+                    self._initialized = True
 
     async def conversation(
         self, conversation_id: str, user_input: str, user_context: str | None = None
     ):
-        """Handle conversation using singleton instance resources."""
         # Ensure singleton is initialized
         await self._ensure_initialized()
 
@@ -78,52 +89,20 @@ class LangchainService:
         )
         return response["messages"][-1]
 
-    @staticmethod
-    def initialize_bedrock_client():
-        """Create and return an Amazon Bedrock client"""
-        try:
-            boto3.setup_default_session(
-                region_name=settings.AWS_REGION,
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            )
-        except Exception as e:
-            logging.error(f"Error initializing Bedrock client: {e!s}")
-            raise
-
-    @classmethod
-    async def get_instance(cls):
-        """Get the singleton instance with proper initialization."""
-        instance = cls()
-        await instance._ensure_initialized()
-        return instance
-
-    async def _ensure_initialized(self):
-        """Ensure the singleton instance is properly initialized with thread safety."""
-        if not self._initialized_instance:
-            async with self._creation_lock:
-                if not self._initialized_instance:  # Double-check locking
-                    await self._initialize_all_resources()
-                    self._initialized_instance = True
-                    # Also set class variable for backward compatibility
-                    LangchainService._initialized = True
-
     async def _initialize_all_resources(self):
-        """Initialize all resources for the singleton instance."""
         try:
-            self._initialize_model_instance()
-            await self._initialize_pool_instance()
-            await self._initialize_checkpointer_instance()
-            self._initialize_graph_instance()
+            self._initialize_model()
+            await self._initialize_pool()
+            await self._initialize_checkpointer()
+            self._initialize_graph()
         except Exception as e:
             logger.error(f"Error initializing Langchain components: {e!s}")
             raise
         logger.info("Langchain components initialized successfully.")
 
-    def _initialize_model_instance(
+    def _initialize_model(
         self, model_id: str | None = None, model_provider: str | None = None
     ):
-        """Initialize model for singleton instance."""
         self._model_id = model_id or settings.MODEL_ID
         self._model_provider = model_provider or settings.MODEL_PROVIDER
         try:
@@ -131,8 +110,6 @@ class LangchainService:
             self._model = init_chat_model(
                 model=self._model_id, model_provider=self._model_provider
             )
-            # Set class variable for backward compatibility
-            LangchainService.model = self._model
             logger.info(
                 f"Model initialized: {self._model_id} with provider: {self._model_provider}"
             )
@@ -140,8 +117,7 @@ class LangchainService:
             logger.error(f"Error initializing model: {e!s}")
             raise
 
-    async def _initialize_pool_instance(self):
-        """Initialize database pool for singleton instance."""
+    async def _initialize_pool(self):
         if self._db_pool is None:
             logger.info("Initializing database pool...")
             try:
@@ -164,47 +140,50 @@ class LangchainService:
                     kwargs=connection_kwargs,
                 )
                 await self._db_pool.open()
-                # Set class variable for backward compatibility
-                LangchainService.db_pool = self._db_pool
                 logger.info("Database pool initialized.")
             except Exception as e:
                 logger.error(f"Error initializing database pool: {e!s}")
                 self._db_pool = None
                 raise
 
-    async def _initialize_checkpointer_instance(self):
-        """Initialize checkpointer for singleton instance."""
+    async def close_pool(self):
+        if self._db_pool:
+            try:
+                await self._db_pool.close()
+                self._db_pool = None
+                logger.info("Database pool closed.")
+            except Exception as e:
+                logger.error(f"Error closing database pool: {e!s}")
+        else:
+            logger.info("No database pool to close.")
+
+    async def _initialize_checkpointer(self):
         if self._checkpointer is None and self._db_pool is not None:
             logger.info("Initializing checkpointer...")
             try:
                 self._checkpointer = AsyncPostgresSaver(self._db_pool)
                 await self._checkpointer.setup()
-                # Set class variable for backward compatibility
-                LangchainService.checkpointer = self._checkpointer
                 logger.info("Checkpointer initialized.")
             except Exception as e:
                 logger.error(f"Error initializing checkpointer: {e!s}")
                 self._checkpointer = None
                 raise
 
-    def _initialize_graph_instance(self):
+    def _initialize_graph(self):
         """Initialize graph for singleton instance."""
         if self._graph is None:
             logger.info("Initializing graph...")
             workflow = StateGraph(state_schema=State)
             workflow.add_edge(START, "model")
-            workflow.add_node("model", self.call_model_instance)
+            workflow.add_node("model", self.call_model)
             workflow.add_edge("model", END)
             self._graph = workflow.compile(checkpointer=self._checkpointer)
-            # Set class variable for backward compatibility
-            LangchainService.graph = self._graph
             logger.info("Graph initialized.")
         else:
             logger.info("Graph already initialized.")
 
-    def call_model_instance(self, state: State):
-        """Instance method to call the model (for singleton instance)."""
-        # Get the components from the state
+    def call_model(self, state: State):
+        """Call the model with the current state."""
         messages = state["messages"]
         user_context = state.get("user_context", None)
         prompt_template = generate_health_anxiety_prompt(user_context)
@@ -217,16 +196,14 @@ class LangchainService:
         logger.info(f"Model response: {response}")
         return {"messages": [response]}
 
-    async def close_pool_instance(self):
-        """Close database pool for singleton instance."""
-        if self._db_pool:
-            try:
-                await self._db_pool.close()
-                self._db_pool = None
-                # Clear class variable for backward compatibility
-                LangchainService.db_pool = None
-                logger.info("Database pool closed.")
-            except Exception as e:
-                logger.error(f"Error closing database pool: {e!s}")
-        else:
-            logger.info("No database pool to close.")
+    @staticmethod
+    def initialize_bedrock_client():
+        try:
+            boto3.setup_default_session(
+                region_name=settings.AWS_REGION,
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            )
+        except Exception as e:
+            logging.error(f"Error initializing Bedrock client: {e!s}")
+            raise

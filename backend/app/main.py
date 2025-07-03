@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     # Cleanup singleton resources
     try:
         instance = await LangchainService.get_instance()
-        await instance.close_pool_instance()
+        await instance.close_pool()
     except Exception as e:
         logger.error(f"Error during Langchain cleanup: {e}")
 
