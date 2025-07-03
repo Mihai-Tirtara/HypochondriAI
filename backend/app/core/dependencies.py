@@ -10,20 +10,19 @@ from app.services.llm import LangchainService  # Import the service class
 logger = logging.getLogger(__name__)
 
 
-def get_langchain_service() -> LangchainService:
+async def get_langchain_service() -> LangchainService:
     """
-    Dependency function that provides an instance of LangchainService.
-    Checks if the service was successfully initialized during startup.
+    Dependency function that provides the singleton LangchainService instance.
+    Ensures the service is properly initialized before returning.
     """
-    # Crucial check: Ensure the class-level initialization succeeded
-    if not LangchainService._initialized:
-        logger.error("Attempted to use LangchainService, but it failed to initialize.")
+    try:
+        return await LangchainService.get_instance()
+    except Exception as e:
+        logger.error(f"Failed to get LangchainService instance: {e}")
         raise HTTPException(
             status_code=503,  # Service Unavailable
             detail="Chat service is currently unavailable due to an initialization error.",
-        )
-    # Return a new, lightweight instance. It uses the shared class resources.
-    return LangchainService()
+        ) from e
 
 
 # Use the database URL from your settings

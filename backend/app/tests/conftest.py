@@ -23,6 +23,9 @@ os.environ["TESTING"] = "True"
 @pytest.fixture(name="session", scope="function")
 def session_fixture():
     """Create a new database session for each test."""
+    # Reset singleton before each test for clean isolation
+    LangchainService._instance = None
+
     print("Datebase uri = " + str(settings.SQLALCHEMY_DATABASE_URI))
     engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
     SQLModel.metadata.create_all(engine)
@@ -35,25 +38,31 @@ def session_fixture():
 
 @pytest.fixture(name="mock_langchain_service", scope="function")
 def mock_langchain_service_fixture():
+    """Mock the LangchainService for testing with singleton support."""
+    # Reset singleton before each test
+    LangchainService._instance = None
+
+    # Store original class variables for restoration
     original_graph = LangchainService.graph
     original_model = LangchainService.model
     original_pool = LangchainService.db_pool
     original_checkpointer = LangchainService.checkpointer
-    """Mock the LangchainService for testing."""
+    original_initialized = LangchainService._initialized
+
+    # Create mock service
     mock_service = MagicMock(spec=LangchainService)
 
     async def mock_conversation(
         conversation_id: str, user_input: str, user_context: str | None = None
     ):
         # Mock the conversation method to return a fixed response
-        # Save original class attributes to restore later
-
         response = AIMessage(content=f"AI response to:{user_input}")
         return response
 
     mock_service.conversation = AsyncMock(side_effect=mock_conversation)
 
-    LangchainService._initialized = True  # Set the initialized flag to True
+    # Mock class variables (still needed for backward compatibility)
+    LangchainService._initialized = True
     LangchainService.graph = MagicMock()
     LangchainService.model = MagicMock()
     LangchainService.checkpointer = MagicMock()
@@ -61,12 +70,13 @@ def mock_langchain_service_fixture():
 
     yield mock_service
 
-    LangchainService._initialized = False  # Reset the initialized flag after tests
+    # Cleanup: Reset singleton and restore original values
+    LangchainService._instance = None
+    LangchainService._initialized = original_initialized
     LangchainService.graph = original_graph
     LangchainService.model = original_model
     LangchainService.checkpointer = original_checkpointer
     LangchainService.db_pool = original_pool
-    # Reset the mock service to its original state
 
 
 @pytest.fixture(name="client", scope="function")
@@ -78,8 +88,8 @@ def client_fixture(session: Session, mock_langchain_service: LangchainService):
     def get_session_override():
         yield session
 
-    # Dependency override for the langchain service
-    def get_langchain_override():
+    # Dependency override for the langchain service (async for singleton)
+    async def get_langchain_override():
         return mock_langchain_service
 
     app.dependency_overrides[get_session] = get_session_override

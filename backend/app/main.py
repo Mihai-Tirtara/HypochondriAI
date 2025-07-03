@@ -28,15 +28,21 @@ async def lifespan(app: FastAPI):
         raise
 
     try:
-        await LangchainService.initialize_langchain_components()
-        logger.info("Langchain components initialized successfully.")
+        # Initialize singleton instance
+        await LangchainService.get_instance()
+        logger.info("Langchain singleton initialized successfully.")
     except Exception as e:
         logger.error(f"Error during Langchain initialization: {e}")
-        LangchainService._initialized = False
         raise
 
     yield
-    await LangchainService.close_pool()
+
+    # Cleanup singleton resources
+    try:
+        instance = await LangchainService.get_instance()
+        await instance.close_pool()
+    except Exception as e:
+        logger.error(f"Error during Langchain cleanup: {e}")
 
 
 app = FastAPI(
