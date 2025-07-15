@@ -1,4 +1,3 @@
-import SymptomForm from './components/Symptomps';
 import TestEndpoint from './components/TestEndpoint';
 import './App.css';
 
