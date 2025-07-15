@@ -28,7 +28,7 @@
     "build": "vite build",
     "serve": "vite preview",
     "generate-client": "openapi-ts --input http://localhost:8000/openapi.json --output ./src/client --client @hey-api/client-axios",
-    "prepare": "cd .. husky frontend/.husky"
+    "prepare": "cd .. && husky frontend/.husky"
   },
   "eslintConfig": {
     "extends": [
