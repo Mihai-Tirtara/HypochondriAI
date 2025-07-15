@@ -24,7 +24,7 @@ os.environ["TESTING"] = "True"
 def session_fixture():
     """Create a new database session for each test."""
     # Reset singleton before each test for clean isolation
-    LangchainService._instance = None
+    LangchainService.instance = None
 
     print("Datebase uri = " + str(settings.SQLALCHEMY_DATABASE_URI))
     engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
@@ -40,14 +40,14 @@ def session_fixture():
 def mock_langchain_service_fixture():
     """Mock the LangchainService for testing with singleton support."""
     # Reset singleton before each test
-    LangchainService._instance = None
+    LangchainService.instance = None
 
     # Store original class variables for restoration
     original_graph = LangchainService.graph
     original_model = LangchainService.model
     original_pool = LangchainService.db_pool
     original_checkpointer = LangchainService.checkpointer
-    original_initialized = LangchainService._initialized
+    original_initialized = LangchainService.initialized
 
     # Create mock service
     mock_service = MagicMock(spec=LangchainService)
@@ -62,7 +62,7 @@ def mock_langchain_service_fixture():
     mock_service.conversation = AsyncMock(side_effect=mock_conversation)
 
     # Mock class variables (still needed for backward compatibility)
-    LangchainService._initialized = True
+    LangchainService.initialized = True
     LangchainService.graph = MagicMock()
     LangchainService.model = MagicMock()
     LangchainService.checkpointer = MagicMock()
@@ -71,8 +71,8 @@ def mock_langchain_service_fixture():
     yield mock_service
 
     # Cleanup: Reset singleton and restore original values
-    LangchainService._instance = None
-    LangchainService._initialized = original_initialized
+    LangchainService.instance = None
+    LangchainService.initialized = original_initialized
     LangchainService.graph = original_graph
     LangchainService.model = original_model
     LangchainService.checkpointer = original_checkpointer

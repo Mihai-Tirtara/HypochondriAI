@@ -70,19 +70,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-print("-" * 20)
-print(f"DEBUG (config.py): APP_ENV='{os.getenv('APP_ENV')}'")  # Check APP_ENV directly
-print(
-    f"DEBUG (config.py): Loading from env_file='{Settings.Config.env_file}'"
-)  # Check which file it *thinks* it loaded
-print(
-    f"DEBUG (config.py): settings.DB_USERNAME = '{settings.DB_USERNAME}'"
-)  # <-- Is this None?
-print(
-    f"DEBUG (config.py): settings.DB_PASSWORD = '{settings.DB_PASSWORD}'"
-)  # <-- Is this None?
-print(
-    f"DEBUG (config.py): settings.SQLALCHEMY_DATABASE_URI = '{settings.SQLALCHEMY_DATABASE_URI}'"
-)
-print("-" * 20)
