@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { startConversationTestNewPost } from '../client/sdk.gen';
 import { MessageRole, ConversationPublic } from '../client/types.gen';
 
 const TestEndpoint: React.FC = () => {
+  const navigate = useNavigate();
   const [symptoms, setSymptoms] = useState('');
   const [additionalDetails, setAdditionalDetails] = useState('');
-  const [response, setResponse] = useState<ConversationPublic | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,8 +34,10 @@ const TestEndpoint: React.FC = () => {
         }
       });
 
-      setResponse(result.data ?? null);
-      console.log('Server response:', result.data);
+      // Navigate to conversation page with the response data
+      navigate('/conversation', { 
+        state: { conversation: result.data } 
+      });
     } catch (err) {
       console.error('Error:', err);
       setError('Failed to start conversation. Please try again.');
@@ -141,39 +144,6 @@ const TestEndpoint: React.FC = () => {
               <span className="text-red-500 mr-2">❌</span>
               <p className="text-red-800 font-medium text-sm sm:text-base">{error}</p>
             </div>
-          </div>
-        )}
-
-        {/* Response Display */}
-        {response && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <span className="mr-2">✅</span>
-              Response
-            </h3>
-            <div className="p-4 bg-gray-50 rounded-xl overflow-auto border border-gray-200">
-              <pre className="text-sm whitespace-pre-wrap text-gray-700">{JSON.stringify(response, null, 2)}</pre>
-            </div>
-
-            {response.messages && response.messages.length > 0 && (
-              <div className="mt-6">
-                <h4 className="font-semibold mb-4 flex items-center">
-                  <span className="mr-2">💬</span>
-                  Messages
-                </h4>
-                <div className="space-y-3">
-                  {response.messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`p-4 rounded-xl border-2 ${msg.role === 'user' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}
-                    >
-                      <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">{msg.role}</p>
-                      <p className="text-gray-800 text-sm sm:text-base">{msg.content}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
