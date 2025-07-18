@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startConversationTestNewPost } from '../client/sdk.gen';
+import { startConversationV1NewPost } from '../client/sdk.gen';
 import { MessageRole, ConversationPublic } from '../client/types.gen';
+import ConversationHistory from './ConversationHistory';
 
 const TestEndpoint: React.FC = () => {
   const navigate = useNavigate();
@@ -9,6 +10,9 @@ const TestEndpoint: React.FC = () => {
   const [additionalDetails, setAdditionalDetails] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
+  
+  const HARDCODED_USER_ID = '9251d0fa-29e4-43ed-9967-7b5768cbb111';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,10 +31,13 @@ const TestEndpoint: React.FC = () => {
         ? `${symptoms}\n\nAdditional details: ${additionalDetails}`
         : symptoms;
 
-      const result = await startConversationTestNewPost({
+      const result = await startConversationV1NewPost({
         body: {
           content: message,
           role: 'user'
+        },
+        query: {
+          user_id: HARDCODED_USER_ID
         }
       });
 
@@ -47,7 +54,28 @@ const TestEndpoint: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="flex h-screen bg-white">
+      {/* Conversation History Sidebar */}
+      <ConversationHistory
+        isCollapsed={isHistoryCollapsed}
+        onToggle={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+      />
+      
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Menu Toggle */}
+        <div className="md:hidden p-4 bg-white border-b border-gray-200">
+          <button
+            onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+            className="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors"
+          >
+            {isHistoryCollapsed ? '☰ Show History' : '✕ Hide History'}
+          </button>
+        </div>
+        
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto flex items-center justify-center p-4 md:p-6 lg:p-8">
+          <div className="w-full max-w-2xl">
       {/* Header Section */}
       <div className="text-center mb-6 sm:mb-8">
         <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 rounded-full mb-4">
@@ -153,6 +181,9 @@ const TestEndpoint: React.FC = () => {
             <p className="text-teal-700 text-xs sm:text-sm">
               This is not a substitute for professional medical advice
             </p>
+          </div>
+        </div>
+      </div>
           </div>
         </div>
       </div>
