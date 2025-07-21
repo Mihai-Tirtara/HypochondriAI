@@ -84,31 +84,41 @@ const Conversation: React.FC<ConversationProps> = ({ initialConversation }) => {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-b from-purple-50 to-purple-100">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-pink-400 to-purple-500 text-white p-4 shadow-lg">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <button 
-            onClick={handleBackToMain}
-            className="flex items-center text-white hover:text-gray-200 transition-colors"
-          >
-            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
-          
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
-              <span className="text-lg">🤖</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold">Health Assistant</h1>
-              <p className="text-sm text-purple-100">Here to help with your health concerns</p>
-            </div>
+    {/* Header */}
+    <div className="bg-gradient-to-r from-pink-400 to-purple-500 text-white py-4 shadow-lg">
+      <div className="relative flex items-center justify-between w-full">
+        {/* Left item: Back button */}
+        <button
+          onClick={handleBackToMain}
+          className="flex items-left text-white hover:text-gray-200 transition-colors z-10 pl-4"
+        >
+          <svg className="w-5 h-5 mr-1 sm:w-6 sm:h-6 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span className="text-sm sm:text-base">Back</span>
+        </button>
+
+        {/* Absolutely Centered Item: Health Assistant title and icon */}
+        {/* This block is absolutely positioned to ensure it's truly centered */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
+          <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3 hidden sm:flex">
+            <span className="text-lg">🤖</span>
           </div>
-          
-          <div className="w-16"></div> {/* Spacer for center alignment */}
+          <div className="text-center sm:text-left">
+            <h1 className="text-base sm:text-lg font-semibold">Health Assistant</h1>
+            <p className="text-xs sm:text-sm text-purple-100 hidden sm:block">Here to help with your health concerns</p>
+          </div>
         </div>
+
+        {/* Right spacer to balance flex layout */}
+        <div className="flex items-center text-white opacity-0 pointer-events-none pr-4">
+          <svg className="w-5 h-5 mr-1 sm:w-6 sm:h-6 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span className="text-sm sm:text-base">Back</span>
+        </div>
+
+      </div>
       </div>
 
       {/* Messages Container */}

@@ -79,14 +79,14 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
   };
 
   return (
-    <div className={`h-full bg-gray-50 border-r border-gray-200 transition-all duration-300 ease-in-out ${
+    <div className={`h-full bg-gray-50 border-r border-gray-200 ${
       isCollapsed ? 'w-16' : 'w-80'
     } ${isCollapsed ? 'md:w-16' : 'md:w-80'} ${isCollapsed ? 'hidden md:block' : 'block'}`}>
       {/* Header */}
-      <div className={`border-b border-gray-200 bg-white transition-all duration-300 ${isCollapsed ? 'p-2' : 'p-4'}`}>
+      <div className={`border-b border-gray-200 bg-white ${isCollapsed ? 'p-2' : 'p-4'}`}>
         <button
           onClick={onToggle}
-          className={`w-full flex items-center text-left bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-all duration-200 ${
+          className={`w-full flex items-center text-left bg-pink-500 text-white rounded-lg hover:bg-pink-600 ${
             isCollapsed 
               ? 'justify-center p-3 aspect-square' 
               : 'justify-between px-4 py-2'
@@ -138,7 +138,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
                 <button
                   key={conversation.id}
                   onClick={() => handleConversationClick(conversation)}
-                  className="w-full text-left p-3 bg-white rounded-lg border border-gray-200 hover:border-pink-300 hover:bg-pink-50 transition-all duration-200 group"
+                  className="w-full text-left p-3 bg-white rounded-lg border border-gray-200 hover:border-pink-300 hover:bg-pink-50 group"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
@@ -149,7 +149,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
                         {formatDate(conversation.created_at)}
                       </p>
                     </div>
-                    <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="ml-2 opacity-0 group-hover:opacity-100">
                       <span className="text-pink-500 text-sm">→</span>
                     </div>
                   </div>
