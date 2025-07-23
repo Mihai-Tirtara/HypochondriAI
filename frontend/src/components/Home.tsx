@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startConversationV1NewPost } from '../client/sdk.gen';
-import { MessageRole, ConversationPublic } from '../client/types.gen';
 import ConversationHistory from './ConversationHistory';
 
-const TestEndpoint: React.FC = () => {
+const Home: React.FC = () => {
   const navigate = useNavigate();
   const [symptoms, setSymptoms] = useState('');
   const [additionalDetails, setAdditionalDetails] = useState('');
@@ -191,4 +190,4 @@ const TestEndpoint: React.FC = () => {
   );
 };
 
-export default TestEndpoint;
+export default Home;
