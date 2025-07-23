@@ -135,7 +135,7 @@ const Conversation: React.FC<ConversationProps> = ({ initialConversation }) => {
                   : 'bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm'
               }`}
             >
-              <p className="text-sm sm:text-base leading-relaxed">{message.content}</p>
+              <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line">{message.content}</p>
               <div className={`text-xs mt-2 ${
                 message.role === 'user' ? 'text-purple-100' : 'text-gray-500'
               }`}>
