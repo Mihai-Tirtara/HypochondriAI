@@ -5,13 +5,12 @@
   "type": "module",
   "dependencies": {
     "@hey-api/client-axios": "^0.7.0",
-    "@tailwindcss/vite": "^4.0.17",
+    "@tailwindcss/vite": "^4.1.11",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
@@ -20,7 +19,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.4.0",
-    "tailwindcss": "^4.0.17",
+    "tailwindcss": "^4.1.11",
     "vite": "^6.2.4",
     "web-vitals": "^2.1.4"
   },
@@ -28,7 +27,8 @@
     "start": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "generate-client": "openapi-ts --input http://localhost:8000/openapi.json --output ./src/client --client @hey-api/client-axios"
+    "generate-client": "openapi-ts --input http://localhost:8000/openapi.json --output ./src/client --client @hey-api/client-axios",
+    "prepare": "cd .. && husky frontend/.husky"
   },
   "eslintConfig": {
     "extends": [
@@ -52,6 +52,11 @@
     "@hey-api/openapi-ts": "^0.66.7",
     "@types/istanbul-reports": "^3.0.4",
     "@types/node": "^22.13.14",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.31.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
     "typescript": "^5.8.3"
   }
 }
