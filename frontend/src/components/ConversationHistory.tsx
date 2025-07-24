@@ -14,7 +14,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const HARDCODED_USER_ID = '9251d0fa-29e4-43ed-9967-7b5768cbb111';
+  const HARDCODED_USER_ID = '0cf8e8af-3aba-4716-8fb7-9d9863d5b8c8';
 
   useEffect(() => {
     fetchConversations();
