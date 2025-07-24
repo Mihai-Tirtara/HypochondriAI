@@ -1,24 +1,64 @@
-# HyphochondriaAI
+<div class="title-block" style="text-align: center;" align="center">
 
-A comprehensive chatbot for providing AI-powered insights and support for people struggling with health anxiety.
+# HyphochondriaAI - Health Anxiety Specialist
 
-## Project Architecture
+<div align="center">
+  <img src="images/logo2.png" alt="HyphochondriaAI Logo" width="300" height="300">
+</div>
 
-The application consists of three main components:
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/Mihai-Tirtara/HypochondriAI)
+[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111.6+-green.svg)](https://fastapi.tiangolo.com/)
+[![License](https://img.shields.io/badge/license-GPL3.0-blue.svg)](LICENSE)
+</div>
 
-1. **Backend API** - Python FastAPI service with LangChain integration
-2. **Database** - PostgreSQL for conversation and user data persistence
-3. **Frontend** - React application in Typescript 
 
-## Local Development Setup
+## Introduction
+HyphochondriaAI is a multi-agent chatbot designed to provide compassionate support and evidence-based information for individuals experiencing health anxiety. Built with modern web technologies and powered by advanced language models, it offers a safe space for users to explore their health concerns while promoting healthy coping mechanisms and encouraging appropriate medical consultation when necessary.
+
+
+## Technology Stack & Features 
+
+- ⚡ **[FastAPI](https://fastapi.tiangolo.com)** for the Python backend API
+  - 🧰 **[SQLModel](https://sqlmodel.tiangolo.com)** for database interactions (ORM)
+  - 🔍 **[Pydantic](https://docs.pydantic.dev)** for data validation and settings management
+  - ✅ **[Pytest](https://pytest.org)** for comprehensive testing
+  - 🔄 **[Alembic](https://alembic.sqlalchemy.org/)** for database migrations
+  - 💾 **[PostgreSQL](https://www.postgresql.org)** as the SQL database
+  - 🔠  💾 **[Ruff](https://github.com/astral-sh/ruff)** and **[Black](https://github.com/psf/black)** for linting and formatting 
+  
+- 🚀 **[React](https://react.dev)** for the frontend
+  - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
+  - 🎨 **[TailwindCSS](https://tailwindcss.com/)** for responsive design
+  - 📱 An automatically generated frontend client
+  - 🐕‍🦺 **[Husky](https://typicode.github.io/husky/)** with ESLint as Git hook 
+
+- 🤖 **[LangChain](https://langchain.com)** for LLM framework 
+  - 🌐 **[LangGraph](https://langgraph.com)** for agent creation and conversation memory
+  - ☁️ **[AWS Bedrock](https://aws.amazon.com/bedrock/)** for AI model access
+  - 🦾 **[Claude](https://claude.ai/new)** as the AI model 
+- 🏭 CI (continuous integration)  based on GitHub Actions.
+
+
+### Main Page 
+[![API docs](images/main_page.png)](https://github.com/Mihai-Tirtara)
+
+### Conversation Page
+[![API docs](images/conversation_page.png)](https://github.com/Mihai-Tirtara)
+
+### Interactive documentation
+[![API docs](images/docs.png)](https://github.com/Mihai-Tirtara)
+
+
+## Installation
 
 Follow these steps to set up and run the application locally:
 
 ### 1. Environment Setup
 
 ```bash
-# Ensure you have Python 3.11+ and Node.js installed
-# PostgreSQL database will be required according to config settings
+# Ensure you have Python 3.12+ and Node.js installed
+# PostgreSQL database will need to be created beforehand 
 ```
 
 ### 2. Backend Service (Python FastAPI)
@@ -45,7 +85,7 @@ DB_PASSWORD=your_db_password
 DB_NAME=health_anxiety
 
 # Start the FastAPI server
-uvicorn main:app --reload
+fastapi dev
 ```
 
 ### 3. Frontend (React) 
@@ -58,50 +98,62 @@ cd frontend
 npm install
 
 # Start the development server
-npm start
+npm run start
 ```
 
-## Current Project Status
+## Development Roadmap 
 
-- ✅ Migrated from Spring Boot to Python FastAPI backend
-- ✅ Implemented LangChain conversation handling
-- ✅ Added PostgreSQL database integration with SQLModel and Alembic
-- ✅ Created comprehensive API endpoints for conversation management
-- ✅ Testing framework and CI pipeline implemented
-- ✅ Frontend compatible with new backend architecture
-- ❌ Large UI improvements as the current is just a test version
+### Phase 1: Advanced AI Architecture 🚀
+**Multi-Agent System Implementation**
 
-## Next Steps
+Implementing a multi-agent architecture using [LangGraph's Hierarchical Agent Teams](https://langchain-ai.github.io/langgraphjs/tutorials/multi_agent/hierarchical_agent_teams/) to create specialized AI agents for different aspects of health anxiety support
+- **Supervisor Agent**: Orchestrates conversation flow and routes queries to specialized agents
+- **Medical Team**: Retrieving up-to date medical information
+- **mental Health Team**: Offering support and techniques for reducing anxiety 
 
-The  development roadmap in order of priority:
+**Agentic RAG Integration**: Each  agent will leverage retrieval-augmented generation to access curated health anxiety resources, medical literature, and therapeutic techniques.
 
-1. **Frontend Updates**:
-   - Implement UI improvements for conversation flow
-   - Add proper error handling
-   - Add proper E2E testing
+### Phase 2: Enhanced Retrieval Systems 🔍
+**Corrective RAG (CRAG) Implementation**
 
-2. **Future Enhancements**:
-   - Health Safety & Security Hardening
-   - Cost Management & Monitoring
-   - User authentication and session management
-   - Docker containerization
-   - Enhanced LLM Operations (Prompt optimization, RAG, etc)
-   - Infrastructure & DevOps
+Building on the foundation, we'll implement [Corrective RAG using LangGraph](https://langchain-ai.github.io/langgraphjs/tutorials/rag/langgraph_crag/) to ensure information accuracy and relevance:
 
+- **Self-Correcting Retrieval**: System evaluates retrieved information quality and re-queries if needed
+- **Multi-Source Validation**: Cross-references information from multiple authoritative health sources
+- **Relevance Scoring**: Advanced filtering to ensure responses are contextually appropriate
+- **Fallback Mechanisms**: Graceful handling when high-quality information isn't available
 
-## Troubleshooting
+### Phase 3: ML Operations & Monitoring 📊
+**MLflow Integration**
 
-### Common Issues
+Implementing comprehensive ML operations using [MLflow for GenAI](https://mlflow.org/docs/latest/genai/) to ensure model performance and reliability:
 
-1. **Backend Service Issues**
-   * Verify database connection settings
-   * Check AWS credentials for Bedrock access
-   * Ensure all dependencies are installed
+- **Model Versioning**: Track and manage different agent configurations and prompt versions
+- **Performance Monitoring**: Real-time tracking of response quality, user satisfaction, and safety metrics
+- **A/B Testing**: Systematic testing of different agent behaviors and response strategies
+- **Experiment Tracking**: Comprehensive logging of model experiments and hyperparameter tuning
+- **Model Registry**: Centralized management of production-ready agent models
 
-2. **Frontend API Connection** (when updated)
-   * Verify backend is running on the expected port
-   * Check for CORS issues in browser console
+### Phase 4: Containerization & Deployment 🐋
+**Docker & AWS Infrastructure**
+
+- **Containerization**: Complete Docker setup for development and production environments
+- **AWS ECS/Fargate**: Scalable container orchestration
+- **Load Balancing**: Auto-scaling based on user demand
+- **Database Migration**: Managed PostgreSQL on AWS RDS
+- **CDN Integration**: CloudFront for optimal frontend performance
+- **Monitoring & Logging**: CloudWatch integration for comprehensive observability
+
+### Phase 5: Production Readiness 🏭
+**Advanced Features & Optimization**
+
+- **User Authentication**: Secure session management and user profiles
+- **Advanced Analytics**: Conversation insights and usage patterns
+- **Multi-language Support**: Internationalization for broader accessibility
+- **Mobile Applications**: Native iOS and Android apps
+- **Health API Integrations**: Connect with popular health tracking platforms
+- **Compliance**: HIPAA-aligned privacy and security measures
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GPL 3.0 License - see the LICENSE file for details.
