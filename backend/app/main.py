@@ -5,7 +5,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import router
-from app.api.router_test import router_test
 from app.config.config import settings
 from app.db.initial_setup import init_db
 from app.services.llm import LangchainService
@@ -64,7 +63,6 @@ app.add_middleware(
 
 # Include the router
 app.include_router(router)
-app.include_router(router_test)
 
 if __name__ == "__main__":
     import uvicorn
