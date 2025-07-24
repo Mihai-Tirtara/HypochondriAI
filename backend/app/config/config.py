@@ -12,10 +12,10 @@ print(f"Using environment file: {env_file}")
 
 class Settings(BaseSettings):
     # App settings
-    APP_NAME: str = "Health Anxiety LLM Service"
+    APP_NAME: str = "HypochondriAI - Health anxiety specialist"
     APP_VERSION: str = "0.1.0"
     APP_DESCRIPTION: str = (
-        "API for interacting with Amazon Bedrock for health anxiety responses"
+        "AI Agent offering personalized support for people struggling with health anxiety"
     )
 
     # API settings

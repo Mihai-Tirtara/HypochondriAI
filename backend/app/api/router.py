@@ -21,7 +21,7 @@ from app.db.crud import (
 )
 from app.services.llm import LangchainService
 
-router = APIRouter(prefix="/v1", tags=["llm"])
+router = APIRouter(prefix="/v1", tags=["agent"])
 
 logger = logging.getLogger(__name__)
 
