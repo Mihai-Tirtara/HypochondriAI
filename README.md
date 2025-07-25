@@ -25,7 +25,7 @@ HyphochondriaAI is a multi-agent chatbot designed to provide compassionate suppo
   - ✅ **[Pytest](https://pytest.org)** for comprehensive testing
   - 🔄 **[Alembic](https://alembic.sqlalchemy.org/)** for database migrations
   - 💾 **[PostgreSQL](https://www.postgresql.org)** as the SQL database
-  - 🔠  💾 **[Ruff](https://github.com/astral-sh/ruff)** and **[Black](https://github.com/psf/black)** for linting and formatting 
+  - 🔠 **[Ruff](https://github.com/astral-sh/ruff)** and **[Black](https://github.com/psf/black)** for linting and formatting 
   
 - 🚀 **[React](https://react.dev)** for the frontend
   - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
