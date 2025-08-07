@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startConversationV1NewPost } from '../client/sdk.gen';
+import { getUserByNameV1NameGet, startConversationV1NewPost } from '../client/sdk.gen';
 import ConversationHistory from './ConversationHistory';
 
 const Home: React.FC = () => {
@@ -10,8 +10,29 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
+  const [userId, setUserId] = useState<string>('');
 
-  const HARDCODED_USER_ID = '0cf8e8af-3aba-4716-8fb7-9d9863d5b8c8';
+  // Fetch user ID on component mount
+  // Using the predefine superuser "admin" for simplicity
+  // This is a temporary solution until user authentication is implemented
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const result = await getUserByNameV1NameGet({
+          query: { user_name: "admin" }
+        });
+
+        if (result.data) {
+          setUserId(result.data.id);
+        }
+      } catch (err) {
+        console.error('Error', err);
+        setError('Failed to find user');
+      }
+    };
+
+    fetchUserId();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +57,7 @@ const Home: React.FC = () => {
           role: 'user'
         },
         query: {
-          user_id: HARDCODED_USER_ID
+          user_id: userId
         }
       });
 
@@ -58,6 +79,7 @@ const Home: React.FC = () => {
       <ConversationHistory
         isCollapsed={isHistoryCollapsed}
         onToggle={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+        userId={userId}
       />
 
       {/* Main Content */}

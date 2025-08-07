@@ -6,19 +6,20 @@ import { ConversationPublic } from '../client/types.gen';
 interface ConversationHistoryProps {
   isCollapsed: boolean;
   onToggle: () => void;
+  userId: string;
 }
 
-const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, onToggle }) => {
+const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, onToggle, userId }) => {
   const navigate = useNavigate();
   const [conversations, setConversations] = useState<ConversationPublic[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const HARDCODED_USER_ID = '0cf8e8af-3aba-4716-8fb7-9d9863d5b8c8';
-
   useEffect(() => {
-    fetchConversations();
-  }, []);
+    if (userId) {
+      fetchConversations();
+    }
+  }, [userId]);
 
   const fetchConversations = async () => {
     setLoading(true);
@@ -26,7 +27,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
 
     try {
       const result = await getConversationsV1ConversationsGet({
-        query: { user_id: HARDCODED_USER_ID }
+        query: { user_id: userId }
       });
 
       if (result.data) {
