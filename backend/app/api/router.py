@@ -12,7 +12,7 @@ from app.api.utils import (
     save_message,
 )
 from app.core.dependencies import get_langchain_service, get_session
-from app.core.models import ConversationPublic, MessageCreate, MessageRole
+from app.core.models import ConversationPublic, MessageCreate, MessageRole, User
 from app.db.crud import (
     check_conversation_exists,
     check_user_exists,
@@ -153,3 +153,25 @@ async def get_conversations(
 
     logger.info(f"Retrieved {len(conversations)} conversations for user ID: {user_id}")
     return conversations
+
+
+@router.get("/name", response_model=User)
+async def get_user_by_name(
+    user_name: str = Query(...), db: Session = Depends(get_session)
+):
+    """Get a user by their username.
+
+    Args:
+        user_name (str): The username of the user.
+        db (Session): The SQLModel session.
+
+    Returns:
+        User: The user object if found, otherwise raises HTTPException.
+    """
+    user = get_user_by_name(session=db, user_name=user_name)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    logger.info(f"Retrieved user with name: {user.name}")
+    return user
