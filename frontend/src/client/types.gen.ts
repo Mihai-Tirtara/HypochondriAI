@@ -29,12 +29,10 @@ export type MessagePublic = {
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
-export type User = {
+export type UserPublic = {
     username: string;
     email: string;
-    id?: string;
-    password_hash: string;
-    created_at?: string;
+    id: string;
 };
 
 export type ValidationError = {
@@ -146,7 +144,7 @@ export type GetUserByNameV1NameGetResponses = {
     /**
      * Successful Response
      */
-    200: User;
+    200: UserPublic;
 };
 
 export type GetUserByNameV1NameGetResponse = GetUserByNameV1NameGetResponses[keyof GetUserByNameV1NameGetResponses];
