@@ -17,7 +17,7 @@
 HyphochondriaAI is a chatbot designed to provide compassionate support and evidence-based information for individuals experiencing health anxiety. Built with modern web technologies and powered by advanced language models, it offers a safe space for users to explore their health concerns while promoting healthy coping mechanisms and encouraging appropriate medical consultation when necessary.
 
 
-## Technology Stack & Features 
+## Technology Stack & Features
 
 - ⚡ **[FastAPI](https://fastapi.tiangolo.com)** for the Python backend API
   - 🧰 **[SQLModel](https://sqlmodel.tiangolo.com)** for database interactions (ORM)
@@ -25,22 +25,22 @@ HyphochondriaAI is a chatbot designed to provide compassionate support and evide
   - ✅ **[Pytest](https://pytest.org)** for comprehensive testing
   - 🔄 **[Alembic](https://alembic.sqlalchemy.org/)** for database migrations
   - 💾 **[PostgreSQL](https://www.postgresql.org)** as the SQL database
-  - 🔠 **[Ruff](https://github.com/astral-sh/ruff)** and **[Black](https://github.com/psf/black)** for linting and formatting 
-  
+  - 🔠 **[Ruff](https://github.com/astral-sh/ruff)** and **[Black](https://github.com/psf/black)** for linting and formatting
+
 - 🚀 **[React](https://react.dev)** for the frontend
   - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
   - 🎨 **[TailwindCSS](https://tailwindcss.com/)** for responsive design
   - 📱 An automatically generated frontend client
-  - 🐕‍🦺 **[Husky](https://typicode.github.io/husky/)** with ESLint as Git hook 
+  - 🐕‍🦺 **[Husky](https://typicode.github.io/husky/)** with ESLint as Git hook
 
-- 🤖 **[LangChain](https://langchain.com)** for LLM framework 
+- 🤖 **[LangChain](https://langchain.com)** for LLM framework
   - 🌐 **[LangGraph](https://langgraph.com)** for agent creation and conversation memory
   - ☁️ **[AWS Bedrock](https://aws.amazon.com/bedrock/)** for AI model access
-  - 🦾 **[Claude](https://claude.ai/new)** as the AI model 
+  - 🦾 **[Claude](https://claude.ai/new)** as the AI model
 - 🏭 CI (continuous integration)  based on GitHub Actions.
 
 
-### Main Page 
+### Main Page
 [![API docs](images/main_page.png)](https://github.com/Mihai-Tirtara)
 
 ### Conversation Page
@@ -58,7 +58,7 @@ Follow these steps to set up and run the application locally:
 
 ```bash
 # Ensure you have Python 3.12+ and Node.js installed
-# PostgreSQL database will need to be created beforehand 
+# PostgreSQL database will need to be created beforehand
 ```
 
 ### 2. Backend Service (Python FastAPI)
@@ -88,7 +88,7 @@ DB_NAME=health_anxiety
 fastapi dev
 ```
 
-### 3. Frontend (React) 
+### 3. Frontend (React)
 
 ```bash
 # Navigate to the frontend directory

@@ -7,5 +7,5 @@ pytest-asyncio
 pytest-mock
 
 # Code Linters / Formatters / Type Checking
-ruff  
-mypy  
+ruff
+mypy

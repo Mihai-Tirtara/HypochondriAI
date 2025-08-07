@@ -10,7 +10,7 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
-  
+
   const HARDCODED_USER_ID = '0cf8e8af-3aba-4716-8fb7-9d9863d5b8c8';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,7 +26,7 @@ const Home: React.FC = () => {
 
     try {
       // Combine symptoms and additional details into a single message
-      const message = additionalDetails.trim() 
+      const message = additionalDetails.trim()
         ? `${symptoms}\n\nAdditional details: ${additionalDetails}`
         : symptoms;
 
@@ -41,8 +41,8 @@ const Home: React.FC = () => {
       });
 
       // Navigate to conversation page with the response data
-      navigate('/conversation', { 
-        state: { conversation: result.data } 
+      navigate('/conversation', {
+        state: { conversation: result.data }
       });
     } catch (err) {
       console.error('Error:', err);
@@ -59,7 +59,7 @@ const Home: React.FC = () => {
         isCollapsed={isHistoryCollapsed}
         onToggle={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
       />
-      
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile Menu Toggle */}
@@ -71,7 +71,7 @@ const Home: React.FC = () => {
             {isHistoryCollapsed ? '☰ Show History' : '✕ Hide History'}
           </button>
         </div>
-        
+
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto flex items-center justify-center p-4 md:p-6 lg:p-8">
           <div className="w-full max-w-2xl">

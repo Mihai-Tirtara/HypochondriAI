@@ -29,6 +29,14 @@ export type MessagePublic = {
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
+export type User = {
+    username: string;
+    email: string;
+    id?: string;
+    password_hash: string;
+    created_at?: string;
+};
+
 export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
@@ -116,30 +124,32 @@ export type ContinueConversationV1ConversationsPostResponses = {
 
 export type ContinueConversationV1ConversationsPostResponse = ContinueConversationV1ConversationsPostResponses[keyof ContinueConversationV1ConversationsPostResponses];
 
-export type StartConversationTestNewPostData = {
-    body: MessageCreate;
+export type GetUserByNameV1NameGetData = {
+    body?: never;
     path?: never;
-    query?: never;
-    url: '/test/new';
+    query: {
+        user_name: string;
+    };
+    url: '/v1/name';
 };
 
-export type StartConversationTestNewPostErrors = {
+export type GetUserByNameV1NameGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type StartConversationTestNewPostError = StartConversationTestNewPostErrors[keyof StartConversationTestNewPostErrors];
+export type GetUserByNameV1NameGetError = GetUserByNameV1NameGetErrors[keyof GetUserByNameV1NameGetErrors];
 
-export type StartConversationTestNewPostResponses = {
+export type GetUserByNameV1NameGetResponses = {
     /**
      * Successful Response
      */
-    200: ConversationPublic;
+    200: User;
 };
 
-export type StartConversationTestNewPostResponse = StartConversationTestNewPostResponses[keyof StartConversationTestNewPostResponses];
+export type GetUserByNameV1NameGetResponse = GetUserByNameV1NameGetResponses[keyof GetUserByNameV1NameGetResponses];
 
 export type ClientOptions = {
     baseURL: 'http://localhost:8000' | (string & {});

@@ -23,12 +23,12 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
   const fetchConversations = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await getConversationsV1ConversationsGet({
         query: { user_id: HARDCODED_USER_ID }
       });
-      
+
       if (result.data) {
         setConversations(result.data);
       }
@@ -41,8 +41,8 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
   };
 
   const handleConversationClick = (conversation: ConversationPublic) => {
-    navigate('/conversation', { 
-      state: { conversation } 
+    navigate('/conversation', {
+      state: { conversation }
     });
   };
 
@@ -50,16 +50,16 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
     if (conversation.title) {
       return conversation.title;
     }
-    
+
     if (conversation.messages && conversation.messages.length > 0) {
       const firstUserMessage = conversation.messages.find(m => m.role === 'user');
       if (firstUserMessage) {
-        return firstUserMessage.content.length > 40 
+        return firstUserMessage.content.length > 40
           ? firstUserMessage.content.substring(0, 40) + '...'
           : firstUserMessage.content;
       }
     }
-    
+
     return 'New Conversation';
   };
 
@@ -68,7 +68,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     if (date.toDateString() === today.toDateString()) {
       return 'Today';
     } else if (date.toDateString() === yesterday.toDateString()) {
@@ -87,8 +87,8 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({ isCollapsed, 
         <button
           onClick={onToggle}
           className={`w-full flex items-center text-left bg-pink-500 text-white rounded-lg hover:bg-pink-600 ${
-            isCollapsed 
-              ? 'justify-center p-3 aspect-square' 
+            isCollapsed
+              ? 'justify-center p-3 aspect-square'
               : 'justify-between px-4 py-2'
           }`}
         >

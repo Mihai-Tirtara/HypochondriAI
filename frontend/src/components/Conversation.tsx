@@ -11,7 +11,7 @@ const Conversation: React.FC<ConversationProps> = ({ initialConversation }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   const [messages, setMessages] = useState<MessagePublic[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
@@ -33,9 +33,9 @@ const Conversation: React.FC<ConversationProps> = ({ initialConversation }) => {
   }, [messages]);
 
   const formatTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 

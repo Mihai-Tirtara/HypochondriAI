@@ -49,5 +49,5 @@ Health anxiety support chatbot with FastAPI backend, React frontend, and Postgre
 ## Claude Code Guidelines
 
 1. **Always run tests** after backend changes: `cd backend && pytest app/tests/`
-2. **Regenerate API client** after backend API changes: `cd frontend && npm run generate-client` 
+2. **Regenerate API client** after backend API changes: `cd frontend && npm run generate-client`
 2. **Venv** When running Python or pip commands, ensure you are working inside the venv either by activating or by using the path to the relevant Python binary

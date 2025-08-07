@@ -48,15 +48,25 @@
       "last 1 safari version"
     ]
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
   "devDependencies": {
     "@hey-api/openapi-ts": "^0.66.7",
     "@types/istanbul-reports": "^3.0.4",
     "@types/node": "^22.13.14",
     "@types/react": "^19.1.8",
-    "eslint": "^9.31.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "eslint": "^9.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
-    "prettier": "^3.6.2",
+    "prettier": "^4.0.0-alpha.8",
     "typescript": "^5.8.3"
   }
 }
