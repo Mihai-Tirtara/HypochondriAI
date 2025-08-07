@@ -12,7 +12,7 @@ from app.api.utils import (
     save_message,
 )
 from app.core.dependencies import get_langchain_service, get_session
-from app.core.models import ConversationPublic, MessageCreate, MessageRole, User
+from app.core.models import ConversationPublic, MessageCreate, MessageRole, UserPublic
 from app.db.crud import (
     check_conversation_exists,
     check_user_exists,
@@ -155,7 +155,7 @@ async def get_conversations(
     return conversations
 
 
-@router.get("/name", response_model=User)
+@router.get("/name", response_model=UserPublic)
 async def get_user_by_name(
     user_name: str = Query(...), db: Session = Depends(get_session)
 ):
