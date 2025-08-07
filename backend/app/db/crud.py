@@ -81,3 +81,9 @@ def check_user_exists(*, session: Session, user_id: uuid.UUID) -> bool:
     """Check if a user exists by its ID."""
     statement = select(User).where(User.id == user_id)
     return session.exec(statement).first() is not None
+
+def get_user_by_name(*, session: Session, user_name: str) -> User:
+    """Get a user by their username."""
+    statement = select(User).where(User.name == user_name)
+    user = session.exec(statement).first()
+    return user
