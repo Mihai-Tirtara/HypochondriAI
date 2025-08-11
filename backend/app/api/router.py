@@ -18,6 +18,7 @@ from app.db.crud import (
     check_user_exists,
     get_conversation_by_id,
     get_conversations_by_user_id,
+    get_user_name,
 )
 from app.services.llm import LangchainService
 
@@ -168,10 +169,10 @@ async def get_user_by_name(
     Returns:
         User: The user object if found, otherwise raises HTTPException.
     """
-    user = get_user_by_name(session=db, user_name=user_name)
+    user = get_user_name(session=db, user_name=user_name)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    logger.info(f"Retrieved user with name: {user.name}")
+    logger.info(f"Retrieved user with name: {user.username}")
     return user

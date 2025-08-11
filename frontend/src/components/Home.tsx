@@ -26,7 +26,6 @@ const Home: React.FC = () => {
           setUserId(result.data.id);
         }
       } catch (err) {
-        console.error('Error', err);
         setError('Failed to find user');
       }
     };
