@@ -21,6 +21,47 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hypochondriai_backend
+    restart: always
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_NAME=${DB_NAME:-HipochondriAI}
+      - DB_SUPERUSER_USERNAME=${DB_SUPERUSER_USERNAME:-postgres}
+      - DB_SUPERUSER_PASSWORD=${DB_SUPERUSER_PASSWORD:-postgres}
+      - DB_SUPERUSER_EMAIL=${DB_SUPERUSER_EMAIL:-admin@hypochondriai.com}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION:-eu-central-1}
+      - MODEL_ID=${MODEL_ID:-anthropic.claude-3-5-sonnet-20240620-v1:0}
+      - MODEL_PROVIDER=${MODEL_PROVIDER:-bedrock_converse}
+      - MAX_TOKENS=${MAX_TOKENS:-1000}
+      - TEMPERATURE=${TEMPERATURE:-0.3}
+      - TOP_P=${TOP_P:-0.4}
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ~/.aws:/home/app/.aws:ro  # Mount AWS credentials
+    networks:
+      - hypochondriai-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 volumes:
   postgres_data:
     driver: local
