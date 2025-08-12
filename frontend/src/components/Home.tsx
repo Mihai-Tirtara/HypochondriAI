@@ -13,20 +13,19 @@ const Home: React.FC = () => {
   const [userId, setUserId] = useState<string>('');
 
   // Fetch user ID on component mount
-  // Using the predefine superuser "admin" for simplicity
   // This is a temporary solution until user authentication is implemented
+  const userName = import.meta.env.VITE_SUPERUSER_NAME || "";
   useEffect(() => {
     const fetchUserId = async () => {
       try {
         const result = await getUserByNameV1NameGet({
-          query: { user_name: "admin" }
+          query: { user_name: userName  }
         });
 
         if (result.data) {
           setUserId(result.data.id);
         }
       } catch (err) {
-        console.error('Error', err);
         setError('Failed to find user');
       }
     };

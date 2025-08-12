@@ -101,6 +101,52 @@ npm install
 npm run start
 ```
 
+### 4. Docker Set-up
+
+```bash
+# Create a .env file in the root folder with folowing variables
+#Example:
+
+# Database Configuration
+DB_NAME=your_db_name
+DB_USERNAME=your_db_username
+DB_PASSWORD=your_db_password
+DB_HOST=postgres
+DB_PORT=5432
+
+# Superuser Configuration
+DB_SUPERUSER_USERNAME=your_superuser_name
+DB_SUPERUSER_PASSWORD=your_superuser_password
+DB_SUPERUSER_EMAIL=your_superuser_email
+
+# AWS Configuration
+AWS_ACCESS_KEY_ID=your_aws_acces_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_acces
+AWS_REGION=your_aws_region
+
+# Bedrock Configuration
+MODEL_ID=your_model_of_choice
+MODEL_PROVIDER=bedrock_converse
+MAX_TOKENS=1000
+TEMPERATURE=0.3
+TOP_P=0.4
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+LOG_LEVEL=INFO
+API_PREFIX=/api/v1
+
+# App settings
+APP_NAME=HypochondriAI - Health anxiety specialist
+APP_VERSION=0.1.0
+APP_DESCRIPTION=AI Agent offering personalized support for people struggling with health anxiety
+
+# The application can now be started locally with a single command
+docker compose up --build
+```
+
+
 ## License
 
 This project is licensed under the GPL 3.0 License - see the LICENSE file for details.
