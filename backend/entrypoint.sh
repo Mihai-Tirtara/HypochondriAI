@@ -44,7 +44,7 @@ wait_for_db
 
 # Run Alembic migrations
 echo "Running database migrations..."
-alembic upgrade head
+cd /app/app && alembic upgrade head
 
 # Check if migrations were successful
 if [ $? -eq 0 ]; then
@@ -53,6 +53,9 @@ else
     echo "Database migrations failed!"
     exit 1
 fi
+
+# Return to the app root directory
+cd /app
 
 # Start the application
 echo "Starting FastAPI application..."

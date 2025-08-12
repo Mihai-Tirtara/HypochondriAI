@@ -14,7 +14,7 @@ const Home: React.FC = () => {
 
   // Fetch user ID on component mount
   // This is a temporary solution until user authentication is implemented
-  const userName =  process.env.REACT_APP_SUPERUSER_NAME || "";
+  const userName = import.meta.env.VITE_SUPERUSER_NAME || "";
   useEffect(() => {
     const fetchUserId = async () => {
       try {
