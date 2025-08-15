@@ -38,6 +38,7 @@ HyphochondriaAI is a chatbot designed to provide compassionate support and evide
   - ☁️ **[AWS Bedrock](https://aws.amazon.com/bedrock/)** for AI model access
   - 🦾 **[Claude](https://claude.ai/new)** as the AI model
 - 🏭 CI (continuous integration)  based on GitHub Actions.
+- 🐋 [Docker Compose](https://www.docker.com) for development and production.
 
 
 ### Main Page
