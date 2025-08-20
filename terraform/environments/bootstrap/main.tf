@@ -39,12 +39,25 @@ resource "aws_s3_bucket" "terraform_state" {
     }
   }
 
-   terraform {
-    backend "s3" {
-      bucket         = "hypochondriai-terraform-state"
-      key            = "prod/terraform.tfstate"
-      region         = "eu-central-1"
-      dynamodb_table = "hypochondriai-terraform-locks"
-      encrypt        = true
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    bucket         = "hypochondriai-terraform-state"
+    key            = "bootstrap/terraform.tfstate"
+    region         = "eu-central-1"
+    dynamodb_table = "hypochondriai-terraform-locks"
+    encrypt        = true
+  }
+}
+
+provider "aws" {
+  region = "eu-central-1"
+}
