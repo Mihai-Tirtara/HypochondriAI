@@ -159,10 +159,6 @@ resource "aws_ecs_task_definition" "backend" {
         {
           name      = "DATABASE_URL"
           valueFrom = var.database_url_secret_arn
-        },
-        {
-          name      = "JWT_SECRET_KEY"
-          valueFrom = var.jwt_secret_arn
         }
       ]
 

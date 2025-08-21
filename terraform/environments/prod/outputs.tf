@@ -75,10 +75,3 @@ output "ecs_log_group_name" {
   description = "Name of the ECS CloudWatch log group"
   value       = module.ecs.backend_log_group_name
 }
-
-# JWT Secret Output
-output "jwt_secret_arn" {
-  description = "ARN of the JWT secret"
-  value       = aws_secretsmanager_secret.jwt_secret.arn
-  sensitive   = true
-}

@@ -129,7 +129,8 @@ resource "aws_db_instance" "main" {
   # Database configuration
   db_name  = "hypochondriai"
   username = "postgres"
-  manage_master_user_password = true
+  manage_master_user_password = false
+  password = random_password.master.result
 
   # Network configuration
   db_subnet_group_name   = aws_db_subnet_group.main.name

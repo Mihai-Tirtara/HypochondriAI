@@ -73,23 +73,6 @@ module "rds" {
   backup_retention_period = var.rds_backup_retention_period
 }
 
-# Secrets Manager for JWT Secret
-resource "aws_secretsmanager_secret" "jwt_secret" {
-  name                    = "${var.project_name}-${var.environment}-jwt-secret"
-  description             = "JWT secret key for ${var.project_name} ${var.environment}"
-  recovery_window_in_days = 0 # For immediate deletion in non-prod environments
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-jwt-secret"
-    Environment = var.environment
-    Project     = var.project_name
-  }
-}
-
-resource "aws_secretsmanager_secret_version" "jwt_secret" {
-  secret_id     = aws_secretsmanager_secret.jwt_secret.id
-  secret_string = var.jwt_secret_value
-}
 
 # ECS Module
 module "ecs" {
@@ -105,7 +88,6 @@ module "ecs" {
 
   # Secrets for the application
   database_url_secret_arn = module.rds.database_url_secret_arn
-  jwt_secret_arn         = aws_secretsmanager_secret.jwt_secret.arn
 
   # Optional ECS configuration
   desired_count         = var.ecs_desired_count

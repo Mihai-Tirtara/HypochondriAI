@@ -66,12 +66,6 @@ variable "rds_backup_retention_period" {
   default     = 7
 }
 
-# JWT Secret Configuration
-variable "jwt_secret_value" {
-  description = "JWT secret key value"
-  type        = string
-  sensitive   = true
-}
 
 # ECS Configuration
 variable "ecs_desired_count" {

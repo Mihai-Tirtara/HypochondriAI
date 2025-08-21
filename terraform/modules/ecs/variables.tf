@@ -38,10 +38,6 @@ variable "database_url_secret_arn" {
   type        = string
 }
 
-variable "jwt_secret_arn" {
-  description = "ARN of the secret containing JWT secret key"
-  type        = string
-}
 
 # Optional variables with defaults
 variable "desired_count" {
