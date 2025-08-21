@@ -147,8 +147,6 @@ resource "aws_lb" "main" {
   security_groups    = [var.alb_security_group_id]
   subnets            = var.public_subnet_ids
 
-  enable_deletion_protection = var.enable_deletion_protection
-
   dynamic "access_logs" {
     for_each = var.enable_access_logs ? [1] : []
     content {

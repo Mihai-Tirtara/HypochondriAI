@@ -1,7 +1,13 @@
 # Random password for RDS master user
 resource "random_password" "master" {
-  length  = 16
-  special = true
+  length           = 16
+  special          = true
+  # Avoid characters that commonly break RDS master passwords
+  override_special = "!#$%^*-_=+[]{}:,.?"   # omit / @ ' " \ & < > ( ) ; space
+  min_lower        = 1
+  min_upper        = 1
+  min_numeric      = 1
+  min_special      = 1
 }
 
 # Secrets Manager secret for RDS credentials
@@ -44,7 +50,7 @@ resource "aws_db_parameter_group" "main" {
   # Performance optimizations for db.t3.micro (1GB RAM)
   parameter {
     name  = "shared_buffers"
-    value = "262144"  # 256MB in 8KB pages
+    value = "32768"  # 256MB in 8KB pages
   }
 
   parameter {
@@ -64,7 +70,7 @@ resource "aws_db_parameter_group" "main" {
 
   parameter {
     name  = "max_connections"
-    value = "100"
+    value = "50"
   }
 
   # Storage optimizations for SSD/gp3
@@ -96,7 +102,7 @@ resource "aws_db_parameter_group" "main" {
 
   parameter {
     name  = "log_checkpoints"
-    value = "1"
+    value = "on"
   }
 
   tags = {
@@ -123,8 +129,7 @@ resource "aws_db_instance" "main" {
   # Database configuration
   db_name  = "hypochondriai"
   username = "postgres"
-  manage_master_user_password = false
-  password = random_password.master.result
+  manage_master_user_password = true
 
   # Network configuration
   db_subnet_group_name   = aws_db_subnet_group.main.name
@@ -139,7 +144,6 @@ resource "aws_db_instance" "main" {
   backup_retention_period = var.backup_retention_period
   backup_window          = var.backup_window
   delete_automated_backups = false
-  deletion_protection    = var.deletion_protection
   final_snapshot_identifier = "${var.project_name}-${var.environment}-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
   skip_final_snapshot    = false
   copy_tags_to_snapshot  = true

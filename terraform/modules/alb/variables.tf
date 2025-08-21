@@ -76,9 +76,3 @@ variable "app_port" {
   type        = number
   default     = 8000
 }
-
-variable "enable_deletion_protection" {
-  description = "Enable deletion protection for ALB"
-  type        = bool
-  default     = true
-}

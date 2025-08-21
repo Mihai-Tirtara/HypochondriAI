@@ -88,12 +88,6 @@ variable "availability_zone" {
   default     = null
 }
 
-variable "deletion_protection" {
-  description = "Enable deletion protection"
-  type        = bool
-  default     = true
-}
-
 # Backup configuration
 variable "backup_retention_period" {
   description = "Backup retention period in days"
