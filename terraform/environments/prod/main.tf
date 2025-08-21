@@ -44,6 +44,21 @@ module "security" {
   vpc_endpoints_security_group_id = module.vpc.vpc_endpoints_security_group_id
 }
 
+# ALB Module
+module "alb" {
+  source = "../../modules/alb"
+
+  project_name           = var.project_name
+  environment           = var.environment
+  vpc_id                = module.vpc.vpc_id
+  public_subnet_ids     = module.vpc.public_subnet_ids
+  alb_security_group_id = module.security.alb_security_group_id
+
+  # Optional configuration
+  enable_access_logs         = var.enable_alb_access_logs
+  enable_deletion_protection = var.enable_alb_deletion_protection
+}
+
 # RDS Module
 module "rds" {
   source = "../../modules/rds"

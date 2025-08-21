@@ -40,6 +40,19 @@ variable "private_subnet_cidrs" {
   default     = ["10.0.10.0/24", "10.0.20.0/24"]
 }
 
+# ALB Configuration
+variable "enable_alb_access_logs" {
+  description = "Enable ALB access logging"
+  type        = bool
+  default     = true
+}
+
+variable "enable_alb_deletion_protection" {
+  description = "Enable deletion protection for ALB"
+  type        = bool
+  default     = true
+}
+
 # RDS Configuration
 variable "rds_instance_class" {
   description = "RDS instance class"
