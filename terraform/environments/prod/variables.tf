@@ -39,3 +39,16 @@ variable "private_subnet_cidrs" {
   type        = list(string)
   default     = ["10.0.10.0/24", "10.0.20.0/24"]
 }
+
+# RDS Configuration
+variable "rds_instance_class" {
+  description = "RDS instance class"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "rds_backup_retention_period" {
+  description = "RDS backup retention period in days"
+  type        = number
+  default     = 7
+}
