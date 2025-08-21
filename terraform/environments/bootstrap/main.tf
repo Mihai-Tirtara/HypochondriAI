@@ -56,7 +56,9 @@ terraform {
     dynamodb_table = "hypochondriai-terraform-locks"
     encrypt        = true
   }
+
 }
+
 
 provider "aws" {
   region = "eu-central-1"
