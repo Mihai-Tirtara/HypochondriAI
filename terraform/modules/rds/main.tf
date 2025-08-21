@@ -203,3 +203,20 @@ resource "aws_iam_role_policy_attachment" "rds_monitoring" {
   role       = aws_iam_role.rds_monitoring[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
+
+# Database URL Secret for Application
+resource "aws_secretsmanager_secret" "database_url" {
+  name                    = "${var.project_name}/${var.environment}/rds/database-url"
+  description             = "Database URL for application connection"
+  recovery_window_in_days = 7
+
+  tags = {
+    Name        = "${var.project_name}-database-url-secret"
+    Environment = var.environment
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "database_url" {
+  secret_id = aws_secretsmanager_secret.database_url.id
+  secret_string = "postgresql://postgres:${random_password.master.result}@${aws_db_instance.main.endpoint}/${aws_db_instance.main.db_name}"
+}

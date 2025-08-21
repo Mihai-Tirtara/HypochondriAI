@@ -65,3 +65,47 @@ variable "rds_backup_retention_period" {
   type        = number
   default     = 7
 }
+
+# JWT Secret Configuration
+variable "jwt_secret_value" {
+  description = "JWT secret key value"
+  type        = string
+  sensitive   = true
+}
+
+# ECS Configuration
+variable "ecs_desired_count" {
+  description = "Desired number of ECS tasks"
+  type        = number
+  default     = 1
+}
+
+variable "ecs_cpu" {
+  description = "CPU units for ECS task"
+  type        = number
+  default     = 512
+}
+
+variable "ecs_memory" {
+  description = "Memory for ECS task in MB"
+  type        = number
+  default     = 1024
+}
+
+variable "ecs_min_capacity" {
+  description = "Minimum number of ECS tasks"
+  type        = number
+  default     = 1
+}
+
+variable "ecs_max_capacity" {
+  description = "Maximum number of ECS tasks"
+  type        = number
+  default     = 3
+}
+
+variable "ecs_log_retention_days" {
+  description = "ECS log retention period in days"
+  type        = number
+  default     = 14
+}

@@ -44,3 +44,41 @@ output "rds_secret_arn" {
   description = "ARN of the RDS credentials secret"
   value       = module.rds.secret_arn
 }
+
+# ECS Outputs
+output "ecs_cluster_name" {
+  description = "Name of the ECS cluster"
+  value       = module.ecs.cluster_name
+}
+
+output "ecs_cluster_arn" {
+  description = "ARN of the ECS cluster"
+  value       = module.ecs.cluster_arn
+}
+
+output "ecs_service_name" {
+  description = "Name of the ECS service"
+  value       = module.ecs.service_name
+}
+
+output "ecs_service_arn" {
+  description = "ARN of the ECS service"
+  value       = module.ecs.service_arn
+}
+
+output "ecr_repository_url" {
+  description = "URL of the ECR repository"
+  value       = module.ecs.ecr_repository_url
+}
+
+output "ecs_log_group_name" {
+  description = "Name of the ECS CloudWatch log group"
+  value       = module.ecs.backend_log_group_name
+}
+
+# JWT Secret Output
+output "jwt_secret_arn" {
+  description = "ARN of the JWT secret"
+  value       = aws_secretsmanager_secret.jwt_secret.arn
+  sensitive   = true
+}

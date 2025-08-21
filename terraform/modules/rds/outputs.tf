@@ -45,3 +45,10 @@ output "parameter_group_name" {
   description = "DB parameter group name"
   value       = aws_db_parameter_group.main.name
 }
+
+# Database URL Secret Output
+output "database_url_secret_arn" {
+  description = "ARN of the database URL secret"
+  value       = aws_secretsmanager_secret.database_url.arn
+  sensitive   = true
+}

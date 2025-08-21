@@ -72,3 +72,46 @@ module "rds" {
   instance_class          = var.rds_instance_class
   backup_retention_period = var.rds_backup_retention_period
 }
+
+# Secrets Manager for JWT Secret
+resource "aws_secretsmanager_secret" "jwt_secret" {
+  name                    = "${var.project_name}-${var.environment}-jwt-secret"
+  description             = "JWT secret key for ${var.project_name} ${var.environment}"
+  recovery_window_in_days = 0 # For immediate deletion in non-prod environments
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-jwt-secret"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "jwt_secret" {
+  secret_id     = aws_secretsmanager_secret.jwt_secret.id
+  secret_string = var.jwt_secret_value
+}
+
+# ECS Module
+module "ecs" {
+  source = "../../modules/ecs"
+
+  project_name           = var.project_name
+  environment           = var.environment
+  aws_region            = var.aws_region
+  vpc_id                = module.vpc.vpc_id
+  private_subnet_ids    = module.vpc.private_subnet_ids
+  ecs_security_group_id = module.security.ecs_security_group_id
+  target_group_arn      = module.alb.target_group_arn
+
+  # Secrets for the application
+  database_url_secret_arn = module.rds.database_url_secret_arn
+  jwt_secret_arn         = aws_secretsmanager_secret.jwt_secret.arn
+
+  # Optional ECS configuration
+  desired_count         = var.ecs_desired_count
+  cpu                   = var.ecs_cpu
+  memory                = var.ecs_memory
+  min_capacity          = var.ecs_min_capacity
+  max_capacity          = var.ecs_max_capacity
+  log_retention_days    = var.ecs_log_retention_days
+}
