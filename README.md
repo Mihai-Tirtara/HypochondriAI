@@ -50,6 +50,8 @@ HyphochondriaAI is a chatbot designed to provide compassionate support and evide
 ### Interactive documentation
 [![API docs](images/docs.png)](https://github.com/Mihai-Tirtara)
 
+## AWS Architecture diagram
+[![API docs](images/diagram.svg)](https://github.com/Mihai-Tirtara)
 
 ## Installation
 
