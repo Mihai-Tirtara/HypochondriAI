@@ -38,20 +38,6 @@ output "task_definition_revision" {
   value       = aws_ecs_task_definition.backend.revision
 }
 
-output "ecr_repository_url" {
-  description = "URL of the ECR repository"
-  value       = aws_ecr_repository.backend.repository_url
-}
-
-output "ecr_repository_name" {
-  description = "Name of the ECR repository"
-  value       = aws_ecr_repository.backend.name
-}
-
-output "ecr_repository_arn" {
-  description = "ARN of the ECR repository"
-  value       = aws_ecr_repository.backend.arn
-}
 
 output "backend_log_group_name" {
   description = "Name of the backend CloudWatch log group"

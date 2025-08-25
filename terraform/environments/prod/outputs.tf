@@ -45,6 +45,22 @@ output "rds_secret_arn" {
   value       = module.rds.secret_arn
 }
 
+# ECR Outputs
+output "ecr_repository_url" {
+  description = "URL of the ECR repository"
+  value       = module.ecr.repository_url
+}
+
+output "ecr_repository_name" {
+  description = "Name of the ECR repository"
+  value       = module.ecr.repository_name
+}
+
+output "ecr_repository_arn" {
+  description = "ARN of the ECR repository"
+  value       = module.ecr.repository_arn
+}
+
 # ECS Outputs
 output "ecs_cluster_name" {
   description = "Name of the ECS cluster"
@@ -66,10 +82,6 @@ output "ecs_service_arn" {
   value       = module.ecs.service_arn
 }
 
-output "ecr_repository_url" {
-  description = "URL of the ECR repository"
-  value       = module.ecs.ecr_repository_url
-}
 
 output "ecs_log_group_name" {
   description = "Name of the ECS CloudWatch log group"

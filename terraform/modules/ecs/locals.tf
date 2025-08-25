@@ -11,7 +11,7 @@ locals {
   container_image_tag = "latest"
 
   # Full container image URI
-  container_image_uri = "${aws_ecr_repository.backend.repository_url}:${local.container_image_tag}"
+  container_image_uri = "${var.ecr_repository_url}:${local.container_image_tag}"
 
   # ALB resource label for auto scaling (extracted from target group ARN)
   # Format: app/load-balancer-name/1234567890123456

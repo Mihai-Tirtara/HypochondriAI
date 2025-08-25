@@ -56,61 +56,6 @@ resource "aws_kms_alias" "ecs" {
   target_key_id = aws_kms_key.ecs.key_id
 }
 
-# ECR Repository
-resource "aws_ecr_repository" "backend" {
-  name                 = "${var.project_name}/backend"
-  image_tag_mutability = "IMMUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-
-  encryption_configuration {
-    encryption_type = "AES256"
-  }
-
-  tags = {
-    Name        = "${var.project_name}-backend-ecr"
-    Environment = var.environment
-    Project     = var.project_name
-  }
-}
-
-# ECR Lifecycle Policy
-resource "aws_ecr_lifecycle_policy" "backend" {
-  repository = aws_ecr_repository.backend.name
-
-  policy = jsonencode({
-    rules = [
-      {
-        rulePriority = 1
-        description  = "Keep last 10 images"
-        selection = {
-          tagStatus     = "tagged"
-          tagPrefixList = ["v"]
-          countType     = "imageCountMoreThan"
-          countNumber   = 10
-        }
-        action = {
-          type = "expire"
-        }
-      },
-      {
-        rulePriority = 2
-        description  = "Delete untagged images older than 1 day"
-        selection = {
-          tagStatus   = "untagged"
-          countType   = "sinceImagePushed"
-          countUnit   = "days"
-          countNumber = 1
-        }
-        action = {
-          type = "expire"
-        }
-      }
-    ]
-  })
-}
 
 # ECS Task Definition
 resource "aws_ecs_task_definition" "backend" {
@@ -125,7 +70,7 @@ resource "aws_ecs_task_definition" "backend" {
   container_definitions = jsonencode([
     {
       name      = "backend"
-      image     = "${aws_ecr_repository.backend.repository_url}:latest"
+      image     = "${var.ecr_repository_url}:latest"
       essential = true
 
       portMappings = [
@@ -199,15 +144,15 @@ resource "aws_ecs_service" "backend" {
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
-  deployment_configuration {
-    minimum_healthy_percent = 50
-    maximum_percent         = 200
+  deployment_controller {
+    type = "ECS"
   }
 
   deployment_circuit_breaker {
     enable   = true
     rollback = true
   }
+
 
   network_configuration {
     security_groups  = [var.ecs_security_group_id]

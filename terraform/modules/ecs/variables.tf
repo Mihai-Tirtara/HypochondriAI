@@ -38,6 +38,11 @@ variable "database_url_secret_arn" {
   type        = string
 }
 
+variable "ecr_repository_url" {
+  description = "URL of the ECR repository for container images"
+  type        = string
+}
+
 
 # Optional variables with defaults
 variable "desired_count" {

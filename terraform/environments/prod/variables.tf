@@ -47,11 +47,6 @@ variable "enable_alb_access_logs" {
   default     = true
 }
 
-variable "enable_alb_deletion_protection" {
-  description = "Enable deletion protection for ALB"
-  type        = bool
-  default     = true
-}
 
 # RDS Configuration
 variable "rds_instance_class" {
@@ -64,6 +59,25 @@ variable "rds_backup_retention_period" {
   description = "RDS backup retention period in days"
   type        = number
   default     = 7
+}
+
+# ECR Configuration
+variable "ecr_repository_name" {
+  description = "Name of the ECR repository"
+  type        = string
+  default     = "backend"
+}
+
+variable "ecr_image_tag_mutability" {
+  description = "ECR image tag mutability setting"
+  type        = string
+  default     = "IMMUTABLE"
+}
+
+variable "ecr_scan_on_push" {
+  description = "Enable image scanning on push to ECR"
+  type        = bool
+  default     = true
 }
 
 

@@ -92,8 +92,7 @@ resource "aws_iam_role_policy" "ecs_execution_role_custom" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = [
-          var.database_url_secret_arn,
-          var.jwt_secret_arn
+          var.database_url_secret_arn
         ]
       },
       {
@@ -144,8 +143,7 @@ resource "aws_iam_role_policy" "ecs_task_role_policy" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = [
-          var.database_url_secret_arn,
-          var.jwt_secret_arn
+          var.database_url_secret_arn
         ]
       },
       {

@@ -55,8 +55,7 @@ module "alb" {
   alb_security_group_id = module.security.alb_security_group_id
 
   # Optional configuration
-  enable_access_logs         = var.enable_alb_access_logs
-  enable_deletion_protection = var.enable_alb_deletion_protection
+  enable_access_logs = var.enable_alb_access_logs
 }
 
 # RDS Module
@@ -73,6 +72,19 @@ module "rds" {
   backup_retention_period = var.rds_backup_retention_period
 }
 
+# ECR Module
+module "ecr" {
+  source = "../../modules/ecr"
+
+  project_name = var.project_name
+  environment  = var.environment
+
+  # Optional ECR configuration
+  repository_name      = var.ecr_repository_name
+  image_tag_mutability = var.ecr_image_tag_mutability
+  scan_on_push        = var.ecr_scan_on_push
+}
+
 
 # ECS Module
 module "ecs" {
@@ -85,6 +97,9 @@ module "ecs" {
   private_subnet_ids    = module.vpc.private_subnet_ids
   ecs_security_group_id = module.security.ecs_security_group_id
   target_group_arn      = module.alb.target_group_arn
+
+  # ECR repository from ECR module
+  ecr_repository_url = module.ecr.repository_url
 
   # Secrets for the application
   database_url_secret_arn = module.rds.database_url_secret_arn
