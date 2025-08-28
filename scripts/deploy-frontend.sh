@@ -85,8 +85,24 @@ log_success "Frontend built successfully"
 # Upload to S3
 log_info "Uploading files to S3..."
 
-# Sync all files to S3 with appropriate cache headers
-aws s3 sync dist/ "s3://$S3_BUCKET/" --delete --exact-timestamps
+# Upload HTML files with correct content type
+aws s3 sync dist/ "s3://$S3_BUCKET/" --delete --exact-timestamps \
+    --exclude "*" --include "*.html" \
+    --content-type "text/html"
+
+# Upload CSS files with correct content type
+aws s3 sync dist/ "s3://$S3_BUCKET/" --delete --exact-timestamps \
+    --exclude "*" --include "*.css" \
+    --content-type "text/css"
+
+# Upload JS files with correct content type
+aws s3 sync dist/ "s3://$S3_BUCKET/" --delete --exact-timestamps \
+    --exclude "*" --include "*.js" \
+    --content-type "application/javascript"
+
+# Upload remaining files (images, fonts, etc.)
+aws s3 sync dist/ "s3://$S3_BUCKET/" --delete --exact-timestamps \
+    --exclude "*.html" --exclude "*.css" --exclude "*.js"
 
 # Set specific cache headers for different file types
 log_info "Setting cache headers..."

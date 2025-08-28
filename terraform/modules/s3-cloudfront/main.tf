@@ -70,13 +70,6 @@ resource "aws_cloudfront_response_headers_policy" "frontend" {
     }
   }
 
-  custom_headers_config {
-    items {
-      header   = "X-Content-Type-Options"
-      value    = "nosniff"
-      override = true
-    }
-  }
 }
 
 # CloudFront distribution

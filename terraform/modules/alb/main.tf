@@ -152,6 +152,7 @@ resource "aws_acm_certificate" "main" {
   }
 }
 
+
 # Application Load Balancer
 resource "aws_lb" "main" {
   name               = "${var.project_name}-${var.environment}-alb"
