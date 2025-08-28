@@ -125,13 +125,20 @@ class LangchainService:
                     "autocommit": True,
                     "prepare_threshold": 0,
                 }
-                conninfo_str = (
-                    f"dbname={settings.DB_NAME} "
-                    f"user={settings.DB_USERNAME} "
-                    f"password={settings.DB_PASSWORD} "
-                    f"host={settings.DB_HOST} "
-                    f"port={settings.DB_PORT}"
-                )
+                # Use DATABASE_URL if available (production), otherwise build from components (local dev)
+                if settings.DATABASE_URL:
+                    # Convert postgresql+psycopg:// back to plain postgresql:// for psycopg3
+                    conninfo_str = settings.DATABASE_URL.replace(
+                        "postgresql+psycopg://", "postgresql://", 1
+                    )
+                else:
+                    conninfo_str = (
+                        f"dbname={settings.DB_NAME} "
+                        f"user={settings.DB_USERNAME} "
+                        f"password={settings.DB_PASSWORD} "
+                        f"host={settings.DB_HOST} "
+                        f"port={settings.DB_PORT}"
+                    )
                 self.db_pool = AsyncConnectionPool(
                     conninfo=conninfo_str,
                     max_size=20,
@@ -199,11 +206,24 @@ class LangchainService:
     @staticmethod
     def initialize_bedrock_client():
         try:
-            boto3.setup_default_session(
-                region_name=settings.AWS_REGION,
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            )
+            # In production/ECS environments, use IAM roles (no explicit credentials needed)
+            # In local development, use access keys if provided
+            if settings.ENVIRONMENT in ["production", "prod", "staging"] or (
+                settings.AWS_ACCESS_KEY_ID is None
+                and settings.AWS_SECRET_ACCESS_KEY is None
+            ):
+                # Use IAM roles - boto3 will automatically discover credentials
+                # from ECS task role, EC2 instance profile, or environment
+                logger.info("Using IAM roles for AWS authentication")
+                boto3.setup_default_session(region_name=settings.AWS_REGION)
+            else:
+                # Use explicit access keys for local development
+                logger.info("Using access keys for AWS authentication")
+                boto3.setup_default_session(
+                    region_name=settings.AWS_REGION,
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                )
         except Exception as e:
-            logging.error(f"Error initializing Bedrock client: {e!s}")
+            logger.error(f"Error initializing Bedrock client: {e!s}")
             raise

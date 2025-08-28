@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str | None = None
     AWS_REGION: str = "eu-central-1"
 
+    # Environment indicator for AWS authentication
+    ENVIRONMENT: str = "dev"
+
     # Bedrock settings
     MODEL_ID: str = "anthropic.claude-3-5-sonnet-20240620-v1:0"
     MODEL_PROVIDER: str = "bedrock_converse"

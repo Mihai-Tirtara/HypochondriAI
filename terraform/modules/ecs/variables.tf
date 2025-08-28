@@ -43,6 +43,21 @@ variable "database_url_secret_arn" {
   type        = string
 }
 
+variable "superuser_username_secret_arn" {
+  description = "ARN of the secret containing superuser username"
+  type        = string
+}
+
+variable "superuser_password_secret_arn" {
+  description = "ARN of the secret containing superuser password"
+  type        = string
+}
+
+variable "superuser_email_secret_arn" {
+  description = "ARN of the secret containing superuser email"
+  type        = string
+}
+
 variable "ecr_repository_url" {
   description = "URL of the ECR repository for container images"
   type        = string

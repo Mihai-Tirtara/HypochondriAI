@@ -86,6 +86,65 @@ module "ecr" {
   force_delete        = true
 }
 
+# Superuser secrets for initial application setup
+resource "random_password" "superuser_password" {
+  length  = 16
+  special = true
+  override_special = "!#$%^*-_=+[]{}:,.?"
+  min_lower   = 1
+  min_upper   = 1
+  min_numeric = 1
+  min_special = 1
+}
+
+resource "aws_secretsmanager_secret" "superuser_username" {
+  name        = "${var.project_name}/${var.environment}/app/superuser-username"
+  description = "Application superuser username"
+  force_overwrite_replica_secret = true
+
+  tags = {
+    Name        = "${var.project_name}-superuser-username-secret"
+    Environment = var.environment
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "superuser_username" {
+  secret_id     = aws_secretsmanager_secret.superuser_username.id
+  secret_string = "admin"
+}
+
+resource "aws_secretsmanager_secret" "superuser_password" {
+  name        = "${var.project_name}/${var.environment}/app/superuser-password"
+  description = "Application superuser password"
+  force_overwrite_replica_secret = true
+
+  tags = {
+    Name        = "${var.project_name}-superuser-password-secret"
+    Environment = var.environment
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "superuser_password" {
+  secret_id     = aws_secretsmanager_secret.superuser_password.id
+  secret_string = random_password.superuser_password.result
+}
+
+resource "aws_secretsmanager_secret" "superuser_email" {
+  name        = "${var.project_name}/${var.environment}/app/superuser-email"
+  description = "Application superuser email"
+  force_overwrite_replica_secret = true
+
+  tags = {
+    Name        = "${var.project_name}-superuser-email-secret"
+    Environment = var.environment
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "superuser_email" {
+  secret_id     = aws_secretsmanager_secret.superuser_email.id
+  secret_string = "admin@hypochondriai.com"
+}
+
 
 # ECS Module
 module "ecs" {
@@ -104,7 +163,10 @@ module "ecs" {
   ecr_repository_url = module.ecr.repository_url
 
   # Secrets for the application
-  database_url_secret_arn = module.rds.database_url_secret_arn
+  database_url_secret_arn       = module.rds.database_url_secret_arn
+  superuser_username_secret_arn = aws_secretsmanager_secret.superuser_username.arn
+  superuser_password_secret_arn = aws_secretsmanager_secret.superuser_password.arn
+  superuser_email_secret_arn    = aws_secretsmanager_secret.superuser_email.arn
 
   # Optional ECS configuration
   desired_count         = var.ecs_desired_count

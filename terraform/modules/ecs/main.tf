@@ -160,6 +160,18 @@ resource "aws_ecs_task_definition" "backend" {
         {
           name      = "DATABASE_URL"
           valueFrom = var.database_url_secret_arn
+        },
+        {
+          name      = "DB_SUPERUSER_USERNAME"
+          valueFrom = var.superuser_username_secret_arn
+        },
+        {
+          name      = "DB_SUPERUSER_PASSWORD"
+          valueFrom = var.superuser_password_secret_arn
+        },
+        {
+          name      = "DB_SUPERUSER_EMAIL"
+          valueFrom = var.superuser_email_secret_arn
         }
       ]
 
