@@ -75,6 +75,9 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
 
+    # CORS settings
+    CORS_ORIGINS: str = "http://localhost:3000"  # Comma-separated origins
+
     class Config:
         env_file = env_file
 

@@ -21,6 +21,12 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Local values for computed configurations
+locals {
+  # Base CORS origins for initial deployment
+  base_cors_origins = var.ecs_cors_origins
+}
+
 # VPC Module
 module "vpc" {
   source = "../../modules/vpc"
@@ -175,4 +181,37 @@ module "ecs" {
   min_capacity          = var.ecs_min_capacity
   max_capacity          = var.ecs_max_capacity
   log_retention_days    = var.ecs_log_retention_days
+  cors_origins          = "${var.ecs_cors_origins},${module.s3_cloudfront.website_url}"
+
+  depends_on = [module.s3_cloudfront]
+}
+
+# S3 + CloudFront Module for Frontend
+module "s3_cloudfront" {
+  source = "../../modules/s3-cloudfront"
+
+  project_name = var.project_name
+  environment  = var.environment
+
+  # CloudFront configuration
+  default_cache_ttl = var.cloudfront_default_cache_ttl
+  max_cache_ttl     = var.cloudfront_max_cache_ttl
+  static_cache_ttl  = var.cloudfront_static_cache_ttl
+  price_class       = var.cloudfront_price_class
+
+  # Custom domain configuration (optional)
+  custom_domain         = var.cloudfront_custom_domain
+  acm_certificate_arn   = var.cloudfront_acm_certificate_arn
+
+  # WAF configuration (optional)
+  web_acl_id = var.cloudfront_web_acl_id
+
+  # Deployment user configuration
+  create_deployment_user          = var.create_frontend_deployment_user
+  create_access_keys             = var.create_frontend_access_keys
+  store_keys_in_secrets_manager  = var.store_frontend_keys_in_secrets_manager
+
+  tags = {
+    Module = "s3-cloudfront"
+  }
 }

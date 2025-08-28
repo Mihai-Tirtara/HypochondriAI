@@ -147,6 +147,10 @@ resource "aws_ecs_task_definition" "backend" {
           value = var.aws_region
         },
         {
+          name  = "CORS_ORIGINS"
+          value = var.cors_origins
+        },
+        {
           name  = "LOG_LEVEL"
           value = var.log_level
         },

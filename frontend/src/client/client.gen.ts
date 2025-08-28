@@ -14,5 +14,5 @@ import { type Config, type ClientOptions as DefaultClientOptions, createClient, 
 export type CreateClientConfig<T extends DefaultClientOptions = ClientOptions> = (override?: Config<DefaultClientOptions & T>) => Config<Required<DefaultClientOptions> & T>;
 
 export const client = createClient(createConfig<ClientOptions>({
-    baseURL: 'http://localhost:8000'
+    baseURL: (window as any).__VITE_API_BASE_URL__ || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 }));

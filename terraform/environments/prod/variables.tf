@@ -117,3 +117,71 @@ variable "ecs_log_retention_days" {
   type        = number
   default     = 14
 }
+
+variable "ecs_cors_origins" {
+  description = "Comma-separated list of allowed CORS origins for backend"
+  type        = string
+  default     = "http://localhost:3000"
+}
+
+# S3 + CloudFront Configuration
+variable "cloudfront_default_cache_ttl" {
+  description = "Default TTL for CloudFront cache in seconds"
+  type        = number
+  default     = 86400 # 24 hours
+}
+
+variable "cloudfront_max_cache_ttl" {
+  description = "Maximum TTL for CloudFront cache in seconds"
+  type        = number
+  default     = 31536000 # 1 year
+}
+
+variable "cloudfront_static_cache_ttl" {
+  description = "TTL for static assets (CSS, JS, images) in seconds"
+  type        = number
+  default     = 31536000 # 1 year
+}
+
+variable "cloudfront_price_class" {
+  description = "CloudFront price class"
+  type        = string
+  default     = "PriceClass_100"
+}
+
+variable "cloudfront_custom_domain" {
+  description = "Custom domain name for CloudFront distribution (optional)"
+  type        = string
+  default     = null
+}
+
+variable "cloudfront_acm_certificate_arn" {
+  description = "ACM certificate ARN for custom domain (required if custom_domain is set)"
+  type        = string
+  default     = null
+}
+
+variable "cloudfront_web_acl_id" {
+  description = "AWS WAF web ACL ID to associate with CloudFront distribution (optional)"
+  type        = string
+  default     = null
+}
+
+# Frontend deployment configuration
+variable "create_frontend_deployment_user" {
+  description = "Create IAM user for frontend deployment"
+  type        = bool
+  default     = true
+}
+
+variable "create_frontend_access_keys" {
+  description = "Create access keys for frontend deployment user"
+  type        = bool
+  default     = true
+}
+
+variable "store_frontend_keys_in_secrets_manager" {
+  description = "Store frontend access keys in AWS Secrets Manager"
+  type        = bool
+  default     = true
+}

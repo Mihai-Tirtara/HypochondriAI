@@ -87,3 +87,41 @@ output "ecs_log_group_name" {
   description = "Name of the ECS CloudWatch log group"
   value       = module.ecs.backend_log_group_name
 }
+
+# S3 + CloudFront Outputs
+output "frontend_s3_bucket_name" {
+  description = "Name of the frontend S3 bucket"
+  value       = module.s3_cloudfront.s3_bucket_name
+}
+
+output "frontend_cloudfront_distribution_id" {
+  description = "ID of the frontend CloudFront distribution"
+  value       = module.s3_cloudfront.cloudfront_distribution_id
+}
+
+output "frontend_cloudfront_domain_name" {
+  description = "Domain name of the frontend CloudFront distribution"
+  value       = module.s3_cloudfront.cloudfront_domain_name
+}
+
+output "frontend_website_url" {
+  description = "URL of the frontend website"
+  value       = module.s3_cloudfront.website_url
+}
+
+output "frontend_deployment_user_name" {
+  description = "Name of the frontend deployment IAM user"
+  value       = module.s3_cloudfront.deployment_user_name
+}
+
+output "frontend_deployment_access_key_id" {
+  description = "Access key ID for frontend deployment user"
+  value       = module.s3_cloudfront.deployment_access_key_id
+  sensitive   = true
+}
+
+output "frontend_deployment_secret_access_key" {
+  description = "Secret access key for frontend deployment user"
+  value       = module.s3_cloudfront.deployment_secret_access_key
+  sensitive   = true
+}

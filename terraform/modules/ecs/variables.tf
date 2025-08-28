@@ -101,6 +101,12 @@ variable "log_level" {
   default     = "INFO"
 }
 
+variable "cors_origins" {
+  description = "Comma-separated list of allowed CORS origins"
+  type        = string
+  default     = "http://localhost:3000"
+}
+
 variable "log_retention_days" {
   description = "CloudWatch log retention period in days"
   type        = number
