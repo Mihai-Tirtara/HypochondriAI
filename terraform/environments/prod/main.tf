@@ -83,6 +83,7 @@ module "ecr" {
   repository_name      = var.ecr_repository_name
   image_tag_mutability = var.ecr_image_tag_mutability
   scan_on_push        = var.ecr_scan_on_push
+  force_delete        = true
 }
 
 
@@ -97,6 +98,7 @@ module "ecs" {
   private_subnet_ids    = module.vpc.private_subnet_ids
   ecs_security_group_id = module.security.ecs_security_group_id
   target_group_arn      = module.alb.target_group_arn
+  alb_arn               = module.alb.alb_arn
 
   # ECR repository from ECR module
   ecr_repository_url = module.ecr.repository_url

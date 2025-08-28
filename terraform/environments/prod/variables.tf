@@ -44,7 +44,7 @@ variable "private_subnet_cidrs" {
 variable "enable_alb_access_logs" {
   description = "Enable ALB access logging"
   type        = bool
-  default     = true
+  default     = false
 }
 
 

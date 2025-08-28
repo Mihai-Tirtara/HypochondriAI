@@ -48,61 +48,77 @@ resource "aws_db_parameter_group" "main" {
   name   = "${var.project_name}-${var.environment}-postgres15"
 
   # Performance optimizations for db.t3.micro (1GB RAM)
+  # Note: shared_buffers and max_connections are static parameters that require DB restart
   parameter {
-    name  = "shared_buffers"
-    value = "32768"  # 256MB in 8KB pages
+    name         = "shared_buffers"
+    value        = "32768"  # 256MB in 8KB pages
+    apply_method = "pending-reboot"
   }
 
   parameter {
-    name  = "effective_cache_size"
-    value = "98304"   # 768MB in 8KB pages
+    name         = "wal_buffers"
+    value        = "2048"    # 16MB in 8KB pages
+    apply_method = "pending-reboot"
   }
 
   parameter {
-    name  = "work_mem"
-    value = "4096"    # 4MB in KB
+    name         = "max_connections"
+    value        = "50"
+    apply_method = "pending-reboot"
   }
 
   parameter {
-    name  = "maintenance_work_mem"
-    value = "65536"   # 64MB in KB
+    name         = "effective_cache_size"
+    value        = "98304"   # 768MB in 8KB pages
+    apply_method = "immediate"
   }
 
   parameter {
-    name  = "max_connections"
-    value = "50"
+    name         = "work_mem"
+    value        = "4096"    # 4MB in KB
+    apply_method = "immediate"
   }
+
+  parameter {
+    name         = "maintenance_work_mem"
+    value        = "65536"   # 64MB in KB
+    apply_method = "immediate"
+  }
+
+
 
   # Storage optimizations for SSD/gp3
   parameter {
-    name  = "random_page_cost"
-    value = "1.1"
+    name         = "random_page_cost"
+    value        = "1.1"
+    apply_method = "immediate"
   }
 
   parameter {
-    name  = "checkpoint_completion_target"
-    value = "0.9"
+    name         = "checkpoint_completion_target"
+    value        = "0.9"
+    apply_method = "immediate"
   }
 
-  parameter {
-    name  = "wal_buffers"
-    value = "2048"    # 16MB in 8KB pages
-  }
+
 
   # Logging and monitoring
   parameter {
-    name  = "log_statement"
-    value = "ddl"
+    name         = "log_statement"
+    value        = "ddl"
+    apply_method = "immediate"
   }
 
   parameter {
-    name  = "log_min_duration_statement"
-    value = "1000"    # Log queries > 1 second
+    name         = "log_min_duration_statement"
+    value        = "1000"    # Log queries > 1 second
+    apply_method = "immediate"
   }
 
   parameter {
-    name  = "log_checkpoints"
-    value = "on"
+    name         = "log_checkpoints"
+    value        = "on"
+    apply_method = "immediate"
   }
 
   tags = {
@@ -129,7 +145,6 @@ resource "aws_db_instance" "main" {
   # Database configuration
   db_name  = "hypochondriai"
   username = "postgres"
-  manage_master_user_password = false
   password = random_password.master.result
 
   # Network configuration
@@ -152,7 +167,7 @@ resource "aws_db_instance" "main" {
   # Maintenance configuration
   maintenance_window         = var.maintenance_window
   auto_minor_version_upgrade = false
-  apply_immediately         = false
+  apply_immediately         = true
 
   # Monitoring configuration
   performance_insights_enabled          = var.performance_insights_enabled

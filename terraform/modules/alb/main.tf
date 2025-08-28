@@ -96,6 +96,19 @@ resource "aws_s3_bucket_policy" "alb_logs" {
         }
         Action   = "s3:PutObject"
         Resource = "${aws_s3_bucket.alb_logs[0].arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+        Condition = {
+          StringEquals = {
+            "s3:x-amz-acl" = "bucket-owner-full-control"
+          }
+        }
+      },
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = data.aws_elb_service_account.main.arn
+        }
+        Action   = "s3:GetBucketAcl"
+        Resource = aws_s3_bucket.alb_logs[0].arn
       },
       {
         Effect = "Allow"
@@ -160,6 +173,12 @@ resource "aws_lb" "main" {
     Name        = "${var.project_name}-${var.environment}-alb"
     Environment = var.environment
   }
+
+  depends_on = [
+    aws_s3_bucket_policy.alb_logs,
+    aws_s3_bucket_public_access_block.alb_logs,
+    aws_s3_bucket_server_side_encryption_configuration.alb_logs
+  ]
 }
 
 # Target Group for ECS Fargate

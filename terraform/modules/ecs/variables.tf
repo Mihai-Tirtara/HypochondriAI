@@ -33,6 +33,11 @@ variable "target_group_arn" {
   type        = string
 }
 
+variable "alb_arn" {
+  description = "ARN of the Application Load Balancer"
+  type        = string
+}
+
 variable "database_url_secret_arn" {
   description = "ARN of the secret containing database URL"
   type        = string

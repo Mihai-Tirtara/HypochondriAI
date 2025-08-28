@@ -65,3 +65,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "force_delete" {
+  description = "If true, will delete the repository even if it contains images"
+  type        = bool
+  default     = false
+}

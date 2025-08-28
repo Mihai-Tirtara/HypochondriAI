@@ -113,7 +113,7 @@ variable "backup_window" {
 variable "maintenance_window" {
   description = "Maintenance window"
   type        = string
-  default     = "sun:03:00-sun:04:00"
+  default     = "sun:04:30-sun:05:30"
   validation {
     condition     = can(regex("^(mon|tue|wed|thu|fri|sat|sun):[0-2][0-9]:[0-5][0-9]-(mon|tue|wed|thu|fri|sat|sun):[0-2][0-9]:[0-5][0-9]$", var.maintenance_window))
     error_message = "Maintenance window must be in format ddd:HH:MM-ddd:HH:MM (e.g., sun:03:00-sun:04:00)."

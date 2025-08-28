@@ -13,13 +13,13 @@ locals {
   # Full container image URI
   container_image_uri = "${var.ecr_repository_url}:${local.container_image_tag}"
 
-  # ALB resource label for auto scaling (extracted from target group ARN)
+  # ALB resource label for auto scaling (extracted from ALB ARN)
   # Format: app/load-balancer-name/1234567890123456
-  alb_resource_label = regex("app/([^/]+/[^/]+)", var.target_group_arn)[0]
+  alb_resource_label = var.alb_arn != null ? regex("app/([^/]+/[^/]+)", var.alb_arn)[0] : null
 
   # Target group resource label for auto scaling (extracted from target group ARN)
   # Format: targetgroup/target-group-name/1234567890123456
-  target_group_resource_label = regex("(targetgroup/[^/]+/[^/]+)", var.target_group_arn)[0]
+  target_group_resource_label = var.target_group_arn != null ? regex("(targetgroup/[^/]+/[^/]+)", var.target_group_arn)[0] : null
 
   # Environment-specific configuration
   environment_config = {

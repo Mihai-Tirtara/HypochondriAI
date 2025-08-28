@@ -84,13 +84,13 @@ resource "aws_security_group_rule" "ecs_rds_egress" {
 }
 
 resource "aws_security_group_rule" "ecs_vpc_endpoints_egress" {
-  type                     = "egress"
-  from_port                = var.https_port
-  to_port                  = var.https_port
-  protocol                 = "tcp"
-  source_security_group_id = var.vpc_endpoints_security_group_id
-  security_group_id        = aws_security_group.ecs.id
-  description              = "AWS services via VPC endpoints"
+  type              = "egress"
+  from_port         = var.https_port
+  to_port           = var.https_port
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.ecs.id
+  description       = "HTTPS egress for AWS services"
 }
 
 # RDS Security Group Rules

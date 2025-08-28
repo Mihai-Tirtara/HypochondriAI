@@ -44,6 +44,59 @@ resource "aws_kms_key" "ecs" {
   description             = "KMS key for ECS execute command encryption"
   deletion_window_in_days = 7
 
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Enable IAM User Permissions"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow Terraform User KMS Operations"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/terraform_hyphochondriAI"
+        }
+        Action = [
+          "kms:ScheduleKeyDeletion",
+          "kms:CancelKeyDeletion",
+          "kms:DescribeKey",
+          "kms:PutKeyPolicy",
+          "kms:GetKeyPolicy"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow CloudWatch Logs"
+        Effect = "Allow"
+        Principal = {
+          Service = "logs.${var.aws_region}.amazonaws.com"
+        }
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+        Condition = {
+          ArnEquals = {
+            "kms:EncryptionContext:aws:logs:arn" = [
+              "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/${var.project_name}-${var.environment}/backend",
+              "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/${var.project_name}-${var.environment}/exec"
+            ]
+          }
+        }
+      }
+    ]
+  })
+
   tags = {
     Name        = "${var.project_name}-${var.environment}-ecs-kms"
     Environment = var.environment
@@ -55,6 +108,9 @@ resource "aws_kms_alias" "ecs" {
   name          = "alias/${var.project_name}-${var.environment}-ecs"
   target_key_id = aws_kms_key.ecs.key_id
 }
+
+# Data sources for account ID
+data "aws_caller_identity" "current" {}
 
 
 # ECS Task Definition

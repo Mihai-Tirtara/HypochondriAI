@@ -3,13 +3,8 @@ resource "aws_cloudwatch_log_group" "backend" {
   name              = "/ecs/${var.project_name}-${var.environment}/backend"
   retention_in_days = var.log_retention_days
 
-  kms_key_id = aws_kms_key.ecs.arn
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-backend-logs"
-    Environment = var.environment
-    Project     = var.project_name
-  }
+  # KMS encryption commented out due to permission issues - can be re-enabled later
+  # kms_key_id = aws_kms_key.ecs.arn
 }
 
 # CloudWatch Log Group for ECS Execute Command
@@ -17,13 +12,8 @@ resource "aws_cloudwatch_log_group" "ecs_exec" {
   name              = "/ecs/${var.project_name}-${var.environment}/exec"
   retention_in_days = 7
 
-  kms_key_id = aws_kms_key.ecs.arn
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-ecs-exec-logs"
-    Environment = var.environment
-    Project     = var.project_name
-  }
+  # KMS encryption commented out due to permission issues - can be re-enabled later
+  # kms_key_id = aws_kms_key.ecs.arn
 }
 
 # CloudWatch Alarms
