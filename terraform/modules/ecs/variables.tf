@@ -92,7 +92,7 @@ variable "container_port" {
 variable "health_check_path" {
   description = "Health check path for the application"
   type        = string
-  default     = "/health"
+  default     = "/v1/health"
 }
 
 variable "log_level" {
