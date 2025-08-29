@@ -76,11 +76,18 @@ jobs:
           chmod +x scripts/build-and-push.sh
           ./scripts/build-and-push.sh
 
+      - name: Get ECR repository name
+        id: ecr_output
+        working-directory: ./terraform/environments/prod
+        run: |
+          echo "Getting ECR repository name..."
+          echo "ecr_repository_name=$(terraform output -raw ecr_repository_name)" >> $GITHUB_OUTPUT
+
       - name: Wait for image push completion
         run: |
           echo "Verifying image was pushed successfully..."
           aws ecr describe-images \
-            --repository-name "${{ env.PROJECT_NAME }}" \
+            --repository-name "${{ steps.ecr_output.outputs.ecr_repository_name }}" \
             --image-ids imageTag=latest \
             --region ${{ env.AWS_REGION }}
           echo "✅ Backend image ready in ECR"
@@ -92,12 +99,20 @@ jobs:
           echo "Deploying infrastructure (VPC, RDS, ECS,ECS, S3, CloudFront)..."
           terraform apply -auto-approve
 
+      - name: Get ECS identifiers
+        id: ecs_output
+        working-directory: ./terraform/environments/prod
+        run: |
+          echo "Getting ECS cluster and service names..."
+          echo "ecs_cluster_name=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_OUTPUT
+          echo "ecs_service_name=$(terraform output -raw ecs_service_name)" >> $GITHUB_OUTPUT
+
       - name: Wait for ECS service stabilization
         run: |
           echo "Waiting for ECS service to stabilize..."
           aws ecs wait services-stable \
-            --cluster ${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-cluster \
-            --services ${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-service \
+            --cluster "${{ steps.ecs_output.outputs.ecs_cluster_name }}" \
+            --services "${{ steps.ecs_output.outputs.ecs_service_name }}" \
             --region ${{ env.AWS_REGION }}
           echo "✅ ECS service is stable"
 
@@ -108,7 +123,6 @@ jobs:
           echo "Retrieving Terraform outputs..."
           echo "alb_dns_name=$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
           echo "website_url=$(terraform output -raw frontend_website_url)" >> $GITHUB_OUTPUT
-          echo "ecr_url=$(terraform output -raw ecr_repository_url)" >> $GITHUB_OUTPUT
           echo "cloudfront_distribution_id=$(terraform output -raw frontend_cloudfront_distribution_id)" >> $GITHUB_OUTPUT
           echo "s3_bucket=$(terraform output -raw frontend_s3_bucket_name)" >> $GITHUB_OUTPUT
           echo "✅ Terraform outputs captured"
