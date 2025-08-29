@@ -33,6 +33,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "~1.0"
+          terraform_wrapper: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -100,6 +101,18 @@ jobs:
             --region ${{ env.AWS_REGION }}
           echo "✅ ECS service is stable"
 
+      - name: Get Terraform outputs
+        id: terraform_outputs
+        working-directory: ./terraform/environments/prod
+        run: |
+          echo "Retrieving Terraform outputs..."
+          echo "alb_dns_name=$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
+          echo "website_url=$(terraform output -raw frontend_website_url)" >> $GITHUB_OUTPUT
+          echo "ecr_url=$(terraform output -raw ecr_repository_url)" >> $GITHUB_OUTPUT
+          echo "cloudfront_distribution_id=$(terraform output -raw frontend_cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          echo "s3_bucket=$(terraform output -raw frontend_s3_bucket_name)" >> $GITHUB_OUTPUT
+          echo "✅ Terraform outputs captured"
+
 
       # Step 6: Frontend Deployment
       - name: Deploy frontend
@@ -129,7 +142,7 @@ jobs:
           while [ $attempt -le $max_attempts ]; do
             echo "Health check attempt $attempt/$max_attempts"
 
-            if curl -k -f -s "https://${{ env.ALB_DNS_NAME }}/docs" > /dev/null; then
+            if curl -k -f -s "https://${{ steps.terraform_outputs.outputs.alb_dns_name }}/docs" > /dev/null; then
               echo "✅ Backend is healthy!"
               break
             fi
@@ -153,7 +166,7 @@ jobs:
           while [ $attempt -le $max_attempts ]; do
             echo "Frontend health check attempt $attempt/$max_attempts"
 
-            if curl -f -s "${{ env.WEBSITE_URL }}" > /dev/null; then
+            if curl -f -s "${{ steps.terraform_outputs.outputs.website_url }}" > /dev/null; then
               echo "✅ Frontend is healthy!"
               break
             fi
@@ -175,12 +188,12 @@ jobs:
           echo ""
           echo "📋 Deployment Summary:"
           echo "===================="
-          echo "🌐 Frontend URL: ${{ env.WEBSITE_URL }}"
-          echo "🔗 Backend API: https://${{ env.ALB_DNS_NAME }}"
-          echo "📄 API Documentation: https://${{ env.ALB_DNS_NAME }}/docs"
-          echo "🐳 Container Image: ${{ env.ECR_URL }}:latest"
-          echo "☁️ CloudFront Distribution: ${{ env.CLOUDFRONT_DISTRIBUTION_ID }}"
-          echo "📦 S3 Bucket: ${{ env.S3_BUCKET }}"
+          echo "🌐 Frontend URL: ${{ steps.terraform_outputs.outputs.website_url }}"
+          echo "🔗 Backend API: https://${{ steps.terraform_outputs.outputs.alb_dns_name }}"
+          echo "📄 API Documentation: https://${{ steps.terraform_outputs.outputs.alb_dns_name }}/docs"
+          echo "🐳 Container Image: ${{ steps.terraform_outputs.outputs.ecr_url }}:latest"
+          echo "☁️ CloudFront Distribution: ${{ steps.terraform_outputs.outputs.cloudfront_distribution_id }}"
+          echo "📦 S3 Bucket: ${{ steps.terraform_outputs.outputs.s3_bucket }}"
           echo ""
           echo "🔧 Infrastructure Components Deployed:"
           echo "- ✅ VPC and networking"
