@@ -89,10 +89,7 @@ jobs:
         working-directory: ./terraform/environments/prod
         run: |
           echo "Deploying infrastructure (VPC, RDS, ECS,ECS, S3, CloudFront)..."
-          terraform apply -auto-approve \
-            -var="ecs_desired_count=1" \
-            -var="ecs_min_capacity=1" \
-            -var="ecs_max_capacity=3"
+          terraform apply -auto-approve
 
       - name: Wait for ECS service stabilization
         run: |
