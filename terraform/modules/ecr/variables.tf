@@ -51,8 +51,8 @@ variable "kms_key" {
 variable "lifecycle_policy" {
   description = "ECR lifecycle policy configuration"
   type = object({
-    keep_last_images = optional(number)
-    untagged_days    = optional(number)
+    keep_last_images = number
+    untagged_days    = number
   })
   default = {
     keep_last_images = 10
