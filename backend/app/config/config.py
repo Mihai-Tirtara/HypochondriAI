@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str | None = None
     AWS_REGION: str = "eu-central-1"
 
+    # Environment indicator for AWS authentication
+    ENVIRONMENT: str = "dev"
+
     # Bedrock settings
     MODEL_ID: str = "anthropic.claude-3-5-sonnet-20240620-v1:0"
     MODEL_PROVIDER: str = "bedrock_converse"
@@ -45,9 +48,20 @@ class Settings(BaseSettings):
     DB_SUPERUSER_PASSWORD: str | None = None
     DB_SUPERUSER_EMAIL: str | None = None
 
+    # Direct database URL (used in production)
+    DATABASE_URL: str | None = None
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:  # noqa: N802
+        # If DATABASE_URL is provided (e.g., from secrets), use it directly
+        if self.DATABASE_URL:
+            # Convert postgresql:// to postgresql+psycopg:// for SQLAlchemy
+            return self.DATABASE_URL.replace(
+                "postgresql://", "postgresql+psycopg://", 1
+            )
+
+        # Otherwise, build from individual components (for local development)
         base_url = MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.DB_USERNAME,
@@ -56,14 +70,13 @@ class Settings(BaseSettings):
             port=self.DB_PORT,
             path=self.DB_NAME,
         )
-        # params = {"pool_pre_ping": "true", "connect_timeout": "10"}
-        # Join parameters into a query string
-        # query_string = "&".join(f"{k}={v}" for k, v in params.items())
-        # return f"{base_url}?{query_string}"
-        return base_url
+        return str(base_url)
 
     # Logging
     LOG_LEVEL: str = "INFO"
+
+    # CORS settings
+    CORS_ORIGINS: str = "http://localhost:3000"  # Comma-separated origins
 
     class Config:
         env_file = env_file

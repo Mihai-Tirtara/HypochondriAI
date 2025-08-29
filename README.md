@@ -37,7 +37,7 @@ HyphochondriaAI is a chatbot designed to provide compassionate support and evide
   - 🌐 **[LangGraph](https://langgraph.com)** for agent creation and conversation memory
   - ☁️ **[AWS Bedrock](https://aws.amazon.com/bedrock/)** for AI model access
   - 🦾 **[Claude](https://claude.ai/new)** as the AI model
-- 🏭 CI (continuous integration)  based on GitHub Actions.
+- 🏭 CI/CD pipeline with GitHub Actions.
 - 🐋 [Docker Compose](https://www.docker.com) for development and production.
 
 
@@ -50,6 +50,46 @@ HyphochondriaAI is a chatbot designed to provide compassionate support and evide
 ### Interactive documentation
 [![API docs](images/docs.png)](https://github.com/Mihai-Tirtara)
 
+## AWS Cloud Architecture
+[![API docs](images/diagram.svg)](https://github.com/Mihai-Tirtara)
+
+ - ☁️ **[ECS](https://aws.amazon.com/ecs/)** with Fargate for serverless container orchestration
+    - 🐳 **[ECR](https://aws.amazon.com/ecr/)** for Docker image registry
+    - 🔐 **[Secrets Manager](https://aws.amazon.com/secrets-manager/)** for secure credential storage
+    - 📊 **[Cloudwatch](https://aws.amazon.com/cloudwatch/)** for monitoring and logging
+    - 🔄 Auto-scaling and health checks with circuit breaker deployment
+  - 🌐 **[CloudFront](https://aws.amazon.com/cloudfront/)** global CDN for frontend delivery
+    - 🪣 **[S3](https://aws.amazon.com/s3/)** for static website hosting
+    - 🔒 Origin Access Control (OAC) for secure bucket access
+    - ⚡ Custom caching policies for optimal performance
+  - 📡 **[Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)** - Custom virtual private cloud with public/private subnets
+    - 🏗️ **[ALB](https://aws.amazon.com/elasticloadbalancing/)** for HTTP/HTTPS traffic distribution
+    - 🔓 VPC Endpoints - Private connectivity to AWS services:
+    - 🔐 **[ACM](https://aws.amazon.com/certificate-manager/)** for SSL/TLS certificates
+    - 🛡️ Security groups and network isolation
+  - 🗄️ **[RDS](https://aws.amazon.com/rds/postgresql/)** managed database
+    - 🔄 Multi-AZ deployment for high availability
+    - 📈 Performance Insights and enhanced monitoring
+    - 🔐 Encrypted storage and automated backups
+  - 🤖 **[Terraform](https://terraform.io)** for Infrastructure as Code
+    - 📝 S3 backend with DynamoDB state locking
+    - 🚀 Automated deployment scripts
+
+
+## ECS Cluster Metrics
+[![API docs](images/ECS_cluster.png)](https://github.com/Mihai-Tirtara)
+
+## ECS Log Events
+[![API docs](images/Log_events.png)](https://github.com/Mihai-Tirtara)
+
+## RDS Metrics
+[![API docs](images/RDS.png)](https://github.com/Mihai-Tirtara)
+
+## ALB Metrics
+[![API docs](images/ELB.png)](https://github.com/Mihai-Tirtara)
+
+## Cloudwatch Alarms
+[![API docs](images/alarm.png)](https://github.com/Mihai-Tirtara)
 
 ## Installation
 

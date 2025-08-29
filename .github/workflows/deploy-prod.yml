@@ -1,0 +1,208 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  AWS_REGION: eu-central-1
+  PROJECT_NAME: hypochondriai
+  ENVIRONMENT: prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      # Step 1: Setup & Preparation
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.0"
+          terraform_wrapper: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      # Step 2: Terraform Initialization & Selective Import
+      - name: Initialize Terraform
+        working-directory: ./terraform/environments/prod
+        run: terraform init
+
+      - name: Import KMS keys
+        working-directory: ./terraform/environments/prod
+        continue-on-error: true
+        run: |
+          echo "Importing existing KMS keys if they exist..."
+          # Add specific KMS key imports as needed
+          echo "KMS key import step completed"
+
+
+      # Step 3: Deploy ECR first
+      - name: Deploy ECR module
+        working-directory: ./terraform/environments/prod
+        run: |
+          echo "Deploying ECR module first..."
+          terraform apply -target="module.ecr" -auto-approve
+
+
+      # Step 4: Backend Deployment
+      - name: Build and push backend Docker image
+        run: |
+          echo "Calling build and push script..."
+          chmod +x scripts/build-and-push.sh
+          ./scripts/build-and-push.sh
+
+      - name: Wait for image push completion
+        run: |
+          echo "Verifying image was pushed successfully..."
+          aws ecr describe-images \
+            --repository-name "${{ env.PROJECT_NAME }}" \
+            --image-ids imageTag=latest \
+            --region ${{ env.AWS_REGION }}
+          echo "✅ Backend image ready in ECR"
+
+      # Step 5: Phase 2 - Application Infrastructure
+      - name: Deploy application infrastructure
+        working-directory: ./terraform/environments/prod
+        run: |
+          echo "Deploying infrastructure (VPC, RDS, ECS,ECS, S3, CloudFront)..."
+          terraform apply -auto-approve
+
+      - name: Wait for ECS service stabilization
+        run: |
+          echo "Waiting for ECS service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-cluster \
+            --services ${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-service \
+            --region ${{ env.AWS_REGION }}
+          echo "✅ ECS service is stable"
+
+      - name: Get Terraform outputs
+        id: terraform_outputs
+        working-directory: ./terraform/environments/prod
+        run: |
+          echo "Retrieving Terraform outputs..."
+          echo "alb_dns_name=$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
+          echo "website_url=$(terraform output -raw frontend_website_url)" >> $GITHUB_OUTPUT
+          echo "ecr_url=$(terraform output -raw ecr_repository_url)" >> $GITHUB_OUTPUT
+          echo "cloudfront_distribution_id=$(terraform output -raw frontend_cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          echo "s3_bucket=$(terraform output -raw frontend_s3_bucket_name)" >> $GITHUB_OUTPUT
+          echo "✅ Terraform outputs captured"
+
+
+      # Step 6: Frontend Deployment
+      - name: Deploy frontend
+        run: |
+          echo "Calling frontend deployment script..."
+          chmod +x scripts/deploy-frontend.sh
+          ./scripts/deploy-frontend.sh
+
+      - name: Wait for CloudFront invalidation
+        run: |
+          echo "✅ Frontend deployment completed with CloudFront invalidation"
+
+      # Step 7: HTTPS Configuration
+      - name: Enable HTTPS testing
+        run: |
+          echo "Calling HTTPS configuration script..."
+          chmod +x scripts/enable-https-testing.sh
+          ./scripts/enable-https-testing.sh
+
+      # Step 8: Health Checks & Verification
+      - name: Health check backend
+        run: |
+          echo "Checking backend health..."
+          max_attempts=30
+          attempt=1
+
+          while [ $attempt -le $max_attempts ]; do
+            echo "Health check attempt $attempt/$max_attempts"
+
+            if curl -k -f -s "https://${{ steps.terraform_outputs.outputs.alb_dns_name }}/docs" > /dev/null; then
+              echo "✅ Backend is healthy!"
+              break
+            fi
+
+            if [ $attempt -eq $max_attempts ]; then
+              echo "❌ Backend health check failed after $max_attempts attempts"
+              exit 1
+            fi
+
+            echo "Backend not ready yet, waiting 10 seconds..."
+            sleep 10
+            ((attempt++))
+          done
+
+      - name: Health check frontend
+        run: |
+          echo "Checking frontend health..."
+          max_attempts=15
+          attempt=1
+
+          while [ $attempt -le $max_attempts ]; do
+            echo "Frontend health check attempt $attempt/$max_attempts"
+
+            if curl -f -s "${{ steps.terraform_outputs.outputs.website_url }}" > /dev/null; then
+              echo "✅ Frontend is healthy!"
+              break
+            fi
+
+            if [ $attempt -eq $max_attempts ]; then
+              echo "❌ Frontend health check failed after $max_attempts attempts"
+              exit 1
+            fi
+
+            echo "Frontend not ready yet, waiting 10 seconds..."
+            sleep 10
+            ((attempt++))
+          done
+
+      # Step 9: Deployment Summary
+      - name: Deployment Summary
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo ""
+          echo "📋 Deployment Summary:"
+          echo "===================="
+          echo "🌐 Frontend URL: ${{ steps.terraform_outputs.outputs.website_url }}"
+          echo "🔗 Backend API: https://${{ steps.terraform_outputs.outputs.alb_dns_name }}"
+          echo "📄 API Documentation: https://${{ steps.terraform_outputs.outputs.alb_dns_name }}/docs"
+          echo "🐳 Container Image: ${{ steps.terraform_outputs.outputs.ecr_url }}:latest"
+          echo "☁️ CloudFront Distribution: ${{ steps.terraform_outputs.outputs.cloudfront_distribution_id }}"
+          echo "📦 S3 Bucket: ${{ steps.terraform_outputs.outputs.s3_bucket }}"
+          echo ""
+          echo "🔧 Infrastructure Components Deployed:"
+          echo "- ✅ VPC and networking"
+          echo "- ✅ Application Load Balancer with HTTPS"
+          echo "- ✅ ECS cluster and service"
+          echo "- ✅ RDS PostgreSQL database"
+          echo "- ✅ ECR container registry"
+          echo "- ✅ S3 + CloudFront for frontend"
+          echo "- ✅ Secrets Manager for app secrets"
+          echo "- ✅ Self-signed SSL certificate"
+          echo ""
+          echo "🚀 Your HypochondriAI application is now live!"

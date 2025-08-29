@@ -176,3 +176,13 @@ async def get_user_by_name(
 
     logger.info(f"Retrieved user with name: {user.username}")
     return user
+
+
+@router.get("/health")
+async def health_check():
+    """Health check endpoint.
+
+    Returns:
+        dict: Health status response.
+    """
+    return {"status": "healthy"}

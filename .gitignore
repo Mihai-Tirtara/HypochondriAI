@@ -86,3 +86,8 @@ coverage/
 # Cache files
 .vite/
 .cache/
+
+# Terraform state files
+*.tfstate
+*.tfstate.backup
+.terraform/
