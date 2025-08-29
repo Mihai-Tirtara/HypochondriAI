@@ -21,7 +21,7 @@ variable "image_tag_mutability" {
 
   validation {
     condition     = contains(["MUTABLE", "IMMUTABLE"], var.image_tag_mutability)
-    error_message = "image_tag_mutability must be either MUTABLE or IMMUTABLE."
+    error_message = "The image_tag_mutability must be either MUTABLE or IMMUTABLE."
   }
 }
 
@@ -38,7 +38,7 @@ variable "encryption_type" {
 
   validation {
     condition     = contains(["AES256", "KMS"], var.encryption_type)
-    error_message = "encryption_type must be either AES256 or KMS."
+    error_message = "The encryption_type must be either AES256 or KMS."
   }
 }
 
@@ -51,8 +51,8 @@ variable "kms_key" {
 variable "lifecycle_policy" {
   description = "ECR lifecycle policy configuration"
   type = object({
-    keep_last_images = optional(number, 10)
-    untagged_days    = optional(number, 1)
+    keep_last_images = optional(number)
+    untagged_days    = optional(number)
   })
   default = {
     keep_last_images = 10
