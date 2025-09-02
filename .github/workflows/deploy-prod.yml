@@ -113,7 +113,9 @@ jobs:
           aws ecs wait services-stable \
             --cluster "${{ steps.ecs_output.outputs.ecs_cluster_name }}" \
             --services "${{ steps.ecs_output.outputs.ecs_service_name }}" \
-            --region ${{ env.AWS_REGION }}
+            --region ${{ env.AWS_REGION }} \
+            --query 'services[0].events' \
+            --output table
           echo "✅ ECS service is stable"
 
       - name: Get Terraform outputs
