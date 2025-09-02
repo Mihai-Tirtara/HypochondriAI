@@ -19,6 +19,11 @@ output "vpc_endpoints_security_group_id" {
 }
 
 # ALB Outputs
+output "alb_arn" {
+  description = "ARN of the Application Load Balancer"
+  value       = module.alb.alb_arn
+}
+
 output "alb_dns_name" {
   description = "DNS name of the Application Load Balancer"
   value       = module.alb.alb_dns_name
